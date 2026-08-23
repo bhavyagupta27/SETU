@@ -19,8 +19,6 @@
 
 <div align="center">
   
-  *(Note: Replace this placeholder image with your actual `demo.gif` showing the UI in action!)*
-  
   <img src="assets/demo.gif" alt="🌉 Setu UI Demo" width="800" style="border-radius: 15px; box-shadow: 0px 4px 15px rgba(239, 68, 68, 0.5);"/>
   
 </div>
