@@ -3,7 +3,7 @@
 <!-- LIVE TYPING TEXT EFFECT -->
 [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Outfit&weight=800&size=40&pause=1000&color=06B6D4&center=true&vCenter=true&width=800&lines=🌉+SETU:+AI+Land+Verification;Bridging+the+Gap+in+Land+Records;Automated.+Secure.+Transparent.)](https://git.io/typing-svg)
 
-**Smart India Hackathon (SIH) | Team Horisers**
+**Smart India Hackathon (SIH) | Team Code Seekers**
 
 [![Live Demo](https://img.shields.io/badge/🔴_LIVE_DEMO-Click_Here-red?style=for-the-badge&logo=youtube&logoColor=white)](https://bhavyagupta27.github.io/SETU/)
 [![Prototype](https://img.shields.io/badge/Status-Live_Simulation-blue?style=for-the-badge)](#)
