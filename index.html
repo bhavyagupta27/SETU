@@ -103,9 +103,16 @@
             <a href="#" class="hover:text-white transition">Dispute Registry</a>
         </div>
         <div class="flex items-center gap-4">
-            <span
-                class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30">System
-                Online</span>
+            <!-- New Blinking LIVE Indicator -->
+            <div class="flex items-center gap-2 bg-red-900/30 border border-red-500/50 px-3 py-1 rounded-full">
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,1)]"></span>
+                </span>
+                <span class="text-xs font-bold text-red-400 tracking-widest uppercase">Live Demo</span>
+            </div>
+            
+            <span class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30">System Online</span>
         </div>
     </nav>
 
@@ -332,8 +339,8 @@
 
                 // 3. Load the Map
                 if (!window.myMap) {
-                    window.myMap = L.map('map').setView([30.900965, 75.857277], 15); 
-                    
+                    window.myMap = L.map('map').setView([30.900965, 75.857277], 15);
+
                     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                         maxZoom: 19,
                         attribution: '© OpenStreetMap'
@@ -348,7 +355,7 @@
                         .bindPopup(popupHtml)
                         .openPopup();
                 }
-            }, 3000); 
+            }, 3000);
         }
 
         function resetSearch() {
