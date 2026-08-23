@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setu - AI Land Verification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Leaflet Map CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        /* Custom Glassmorphism & Animations */
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #0f172a;
+            /* Deep Slate */
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            color: white;
+        }
+
+        .glass-input:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+        }
+
+        .glow-button {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            transition: all 0.3s ease;
+        }
+
+        .glow-button:hover {
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(6, 182, 212, 0.5);
+            box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.3);
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+
+        /* Animated Background Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.4;
+            z-index: -1;
+            animation: float 10s infinite ease-in-out alternate;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(30px, -50px);
+            }
+        }
+    </style>
+</head>
+
+<body class="text-gray-200 min-h-screen relative">
+
+    <!-- Background Glowing Orbs -->
+    <div class="orb bg-cyan-600 w-96 h-96 top-10 left-10"></div>
+    <div class="orb bg-blue-700 w-[30rem] h-[30rem] bottom-0 right-10" style="animation-delay: -3s;"></div>
+    <div class="orb bg-emerald-600 w-80 h-80 top-1/2 left-1/3" style="animation-delay: -5s;"></div>
+
+    <!-- Glass Navbar -->
+    <nav class="glass-panel sticky top-0 z-50 px-6 py-4 flex justify-between items-center border-b-0 border-white/10">
+        <div class="flex items-center gap-3">
+            <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center font-bold text-xl shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+                S</div>
+            <h1 class="text-2xl font-bold tracking-wide text-white">SETU</h1>
+        </div>
+        <div class="hidden md:flex gap-8 text-sm font-semibold text-gray-300">
+            <a href="#" class="text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">Verification Portal</a>
+            <a href="#" class="hover:text-white transition">Document AI</a>
+            <a href="#" class="hover:text-white transition">Dispute Registry</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <span
+                class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30">System
+                Online</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12 relative z-10 flex flex-col items-center">
+
+        <!-- Search Section -->
+        <div id="search-section" class="w-full max-w-4xl flex flex-col items-center">
+
+            <div class="text-center mb-10">
+                <p class="text-cyan-400 font-semibold mb-2 tracking-widest text-sm uppercase">Unified Land Database</p>
+                <h2
+                    class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-gray-400 mb-4">
+                    Verify Property <br /> with AI Precision.
+                </h2>
+                <p class="text-gray-400 max-w-xl mx-auto">Cross-reference land ownership, encumbrances, and legal
+                    disputes across fragmented government registries in milliseconds.</p>
+            </div>
+
+            <!-- The Glowing Central Form -->
+            <div class="glass-panel rounded-3xl p-8 w-full shadow-2xl relative overflow-hidden group">
+                <!-- Subtle internal highlight -->
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 pointer-events-none">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 relative z-10">
+                    <div>
+                        <label
+                            class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider">State</label>
+                        <input type="text" placeholder="e.g., Punjab"
+                            class="glass-input w-full p-4 rounded-xl transition">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider">District</label>
+                        <input type="text" placeholder="e.g., Ludhiana"
+                            class="glass-input w-full p-4 rounded-xl transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider">Khasra /
+                            Survey No.</label>
+                        <input type="text" placeholder="e.g., 45/2"
+                            class="glass-input w-full p-4 rounded-xl transition">
+                    </div>
+                </div>
+
+                <div class="mb-8 relative z-10">
+                    <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider">Upload Sale
+                        Deed (OCR Scan)</label>
+                    <div class="glass-input rounded-xl p-2 flex items-center">
+                        <input type="file"
+                            class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:text-cyan-300 hover:file:bg-cyan-500/30 file:cursor-pointer file:transition">
+                    </div>
+                </div>
+
+                <button onclick="runVerification()"
+                    class="glow-button w-full text-white font-bold text-lg py-4 rounded-xl relative z-10">
+                    Execute Data Check
+                </button>
+            </div>
+
+            <!-- Bottom Feature Cards (Mimicking the Explore/Learn/Share cards) -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 w-full">
+                <div class="glass-panel feature-card rounded-2xl p-6 cursor-pointer">
+                    <div
+                        class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center mb-4 text-blue-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-white mb-2">OCR Matching</h3>
+                    <p class="text-xs text-gray-400">Extracts data from uploaded deeds to find physical-to-digital
+                        mismatches.</p>
+                </div>
+                <div class="glass-panel feature-card rounded-2xl p-6 cursor-pointer border-t border-t-emerald-500/30">
+                    <div class="flex justify-between items-start mb-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded">Live</span>
+                    </div>
+                    <h3 class="font-bold text-white mb-2">Encumbrance Check</h3>
+                    <p class="text-xs text-gray-400">Real-time flags for active mortgages or financial liabilities on
+                        the land.</p>
+                </div>
+                <div class="glass-panel feature-card rounded-2xl p-6 cursor-pointer">
+                    <div
+                        class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mb-4 text-purple-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-white mb-2">Dispute Registry</h3>
+                    <p class="text-xs text-gray-400">Cross-checks court databases for pending litigations or stay
+                        orders.</p>
+                </div>
+                <div class="glass-panel feature-card rounded-2xl p-6 cursor-pointer">
+                    <div
+                        class="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center mb-4 text-cyan-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-white mb-2">Transaction History</h3>
+                    <p class="text-xs text-gray-400">Immutable chronological ledger of all previous ownership transfers.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="hidden flex-col items-center justify-center mt-20">
+            <div
+                class="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mb-4 shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+            </div>
+            <p class="text-cyan-300 font-bold tracking-widest uppercase animate-pulse">Running OCR & Database
+                Protocols...</p>
+        </div>
+
+        <!-- Results Dashboard -->
+        <div id="results-section" class="hidden w-full max-w-5xl mt-8">
+            <button onclick="resetSearch()"
+                class="mb-6 text-sm text-cyan-400 hover:text-cyan-300 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg> Back to Search
+            </button>
+
+            <!-- Risk Score Card -->
+            <div
+                class="glass-panel border-l-4 border-l-red-500 p-6 rounded-2xl mb-8 flex justify-between items-center relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-64 h-64 bg-red-500/10 rounded-full blur-[50px] -z-10"></div>
+                <div>
+                    <h3 class="text-2xl font-bold text-white">System Alert: Discrepancies Found</h3>
+                    <p class="text-red-400 font-semibold mt-1">Uploaded document does not match authoritative records.
+                    </p>
+                </div>
+                <div class="text-center bg-black/30 px-6 py-3 rounded-xl border border-white/5">
+                    <span class="text-4xl font-black text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">65%</span>
+                    <p class="text-xs text-gray-400 uppercase tracking-wider mt-1">Verification Score</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Govt Database -->
+                <div class="glass-panel p-6 rounded-2xl">
+                    <h4
+                        class="font-bold text-lg mb-4 text-cyan-400 border-b border-white/10 pb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                            </path>
+                        </svg>
+                        Govt Database (Authoritative)
+                    </h4>
+                    <div class="space-y-3 text-sm text-gray-300">
+                        <p class="flex justify-between border-b border-white/5 pb-2"><span>Owner:</span> <strong
+                                class="text-white">Rajesh Kumar</strong></p>
+                        <p class="flex justify-between border-b border-white/5 pb-2"><span>Area:</span> <strong
+                                class="text-white">1.5 Hectares</strong></p>
+                        <p class="flex justify-between border-b border-white/5 pb-2"><span>Status:</span> <strong
+                                class="text-red-400 bg-red-500/10 px-2 rounded">Active Mortgage (SBI)</strong></p>
+                    </div>
+                </div>
+
+                <!-- OCR Extracted -->
+                <div class="glass-panel border border-yellow-500/30 p-6 rounded-2xl relative">
+                    <div class="absolute inset-0 bg-yellow-500/5 rounded-2xl pointer-events-none"></div>
+                    <h4
+                        class="font-bold text-lg mb-4 text-yellow-400 border-b border-white/10 pb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                        OCR Scan (Uploaded Document)
+                    </h4>
+                    <div class="space-y-3 text-sm text-gray-300 relative z-10">
+                        <p class="flex justify-between border-b border-white/5 pb-2"><span>Owner:</span> <strong
+                                class="text-red-400 underline decoration-red-500/50">Ramesh Kumar</strong> <span
+                                class="text-xs bg-red-500/20 text-red-300 px-1 rounded ml-2">Mismatch</span></p>
+                        <p class="flex justify-between border-b border-white/5 pb-2"><span>Area:</span> <strong
+                                class="text-white">1.5 Hectares</strong></p>
+                        <p class="flex justify-between border-b border-white/5 pb-2"><span>Status:</span> <strong
+                                class="text-white">Clear</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map View -->
+            <div class="glass-panel p-6 rounded-2xl mt-8">
+                <h4 class="font-bold text-lg mb-4 text-white border-b border-white/10 pb-2">Geospatial Plotting</h4>
+                <div id="map" class="h-80 w-full rounded-xl z-0 relative z-10 border border-white/10 shadow-inner">
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function runVerification() {
+            // 1. Hide search, show loading
+            document.getElementById('search-section').classList.add('hidden');
+            const loadingState = document.getElementById('loading-state');
+            loadingState.classList.remove('hidden');
+            loadingState.classList.add('flex');
+
+            // 2. Wait exactly 3 seconds, then show results
+            setTimeout(() => {
+                loadingState.classList.add('hidden');
+                loadingState.classList.remove('flex');
+                document.getElementById('results-section').classList.remove('hidden');
+
+                // 3. Load the Map
+                if (!window.myMap) {
+                    window.myMap = L.map('map').setView([30.900965, 75.857277], 15); 
+                    
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    }).addTo(window.myMap);
+
+                    var popupHtml = `<div style="background:#0f172a; color:white; padding:5px; border-radius:5px;">
+                                        <b style="color:#ef4444;">Khasra 45/2</b><br>
+                                        <span style="color:#9ca3af;">Flagged for review</span>
+                                     </div>`;
+
+                    L.marker([30.900965, 75.857277]).addTo(window.myMap)
+                        .bindPopup(popupHtml)
+                        .openPopup();
+                }
+            }, 3000); 
+        }
+
+        function resetSearch() {
+            document.getElementById('results-section').classList.add('hidden');
+            document.getElementById('search-section').classList.remove('hidden');
+        }
+    </script>
+</body>
+
+</html>
