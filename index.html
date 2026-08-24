@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setu - AI Land Verification</title>
+    <title>SETU – AI Land Verification Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Leaflet Map CSS and JS -->
@@ -12,39 +12,37 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        /* Custom Glassmorphism & Animations */
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
         body {
             font-family: 'Outfit', sans-serif;
-            background-color: #0f172a;
-            /* Deep Slate */
+            background-color: #0b0f19;
             overflow-x: hidden;
         }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
         }
 
         .glass-input {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(6, 182, 212, 0.3);
+            background: rgba(11, 15, 25, 0.7);
+            border: 1px solid rgba(6, 182, 212, 0.2);
             color: white;
         }
 
         .glass-input:focus {
             outline: none;
             border-color: #06b6d4;
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.35);
         }
 
         .glow-button {
             background: linear-gradient(135deg, #06b6d4, #3b82f6);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .glow-button:hover {
@@ -52,31 +50,46 @@
             transform: translateY(-2px);
         }
 
+        .feature-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         .feature-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(6, 182, 212, 0.5);
-            box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.3);
-            transform: translateY(-5px);
-            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(6, 182, 212, 0.4);
+            box-shadow: 0 12px 30px -10px rgba(6, 182, 212, 0.3);
+            transform: translateY(-4px);
         }
 
         /* Animated Background Orbs */
         .orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.4;
+            filter: blur(120px);
+            opacity: 0.3;
             z-index: -1;
-            animation: float 10s infinite ease-in-out alternate;
+            animation: float 12s infinite ease-in-out alternate;
         }
 
         @keyframes float {
             0% {
-                transform: translate(0, 0);
+                transform: translate(0, 0) scale(1);
             }
-
             100% {
-                transform: translate(30px, -50px);
+                transform: translate(50px, -60px) scale(1.1);
+            }
+        }
+        
+        .pulse-border {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(6, 182, 212, 0.5);
             }
         }
     </style>
@@ -87,280 +100,2952 @@
     <!-- Background Glowing Orbs -->
     <div class="orb bg-cyan-600 w-96 h-96 top-10 left-10"></div>
     <div class="orb bg-blue-700 w-[30rem] h-[30rem] bottom-0 right-10" style="animation-delay: -3s;"></div>
-    <div class="orb bg-emerald-600 w-80 h-80 top-1/2 left-1/3" style="animation-delay: -5s;"></div>
+    <div class="orb bg-emerald-600 w-80 h-80 top-1/2 left-1/3" style="animation-delay: -6s;"></div>
 
     <!-- Glass Navbar -->
-    <nav class="glass-panel sticky top-0 z-50 px-6 py-4 flex justify-between items-center border-b-0 border-white/10">
-        <div class="flex items-center gap-3">
-            <div
-                class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center font-bold text-xl shadow-[0_0_15px_rgba(6,182,212,0.5)]">
-                S</div>
+    <nav class="glass-panel sticky top-0 z-50 px-6 py-4 flex justify-between items-center border-b border-white/5">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('home')">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center font-bold text-xl shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+                S
+            </div>
             <h1 class="text-2xl font-bold tracking-wide text-white">SETU</h1>
         </div>
+        
         <div class="hidden md:flex gap-8 text-sm font-semibold text-gray-300">
-            <a href="#" class="text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">Verification Portal</a>
-            <a href="#" class="hover:text-white transition">Document AI</a>
-            <a href="#" class="hover:text-white transition">Dispute Registry</a>
+            <button onclick="navigateTo('wizard')" class="hover:text-cyan-400 transition" data-i18n="ctaVerify">Verify Property</button>
+            <a href="#" class="hover:text-white transition" onclick="showFeatureNotice('Document AI')">Document AI</a>
+            <a href="#" class="hover:text-white transition" onclick="showFeatureNotice('Dispute Registry')">Dispute Registry</a>
         </div>
+        
         <div class="flex items-center gap-4">
-            <!-- New Blinking LIVE Indicator -->
-            <div class="flex items-center gap-2 bg-red-900/30 border border-red-500/50 px-3 py-1 rounded-full">
-                <span class="relative flex h-3 w-3">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,1)]"></span>
+            <!-- Language Switcher -->
+            <div class="flex bg-black/40 border border-white/10 rounded-lg p-0.5 text-xs">
+                <button id="lang-btn-en" onclick="setLanguage('en')" class="px-2 py-1 rounded-md bg-cyan-500/20 text-cyan-300 font-bold">EN</button>
+                <button id="lang-btn-hi" onclick="setLanguage('hi')" class="px-2 py-1 rounded-md font-bold">हिन्दी</button>
+            </div>
+
+            <!-- Server Connection Indicator -->
+            <div id="connection-badge" class="flex items-center gap-2 bg-yellow-900/30 border border-yellow-500/30 px-3 py-1 rounded-full text-xs text-yellow-400">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-500 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
                 </span>
-                <span class="text-xs font-bold text-red-400 tracking-widest uppercase">Live Demo</span>
+                <span id="connection-text">Checking API...</span>
             </div>
             
-            <span class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30">System Online</span>
+            <div class="flex items-center gap-2 bg-red-950/40 border border-red-500/30 px-3 py-1 rounded-full text-xs">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+                <span class="font-bold text-red-400 uppercase tracking-wider text-[10px]" data-i18n="prototypeLabel">Prototype - Demo Data</span>
+            </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-12 relative z-10 flex flex-col items-center">
+    <main class="container mx-auto px-4 py-8 relative z-10">
 
-        <!-- Search Section -->
-        <div id="search-section" class="w-full max-w-4xl flex flex-col items-center">
-
-            <div class="text-center mb-10">
-                <p class="text-cyan-400 font-semibold mb-2 tracking-widest text-sm uppercase">Unified Land Database</p>
-                <h2
-                    class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-gray-400 mb-4">
-                    Verify Property <br /> with AI Precision.
+        <!-- 1. LANDING PAGE / DASHBOARD -->
+        <section id="view-home" class="w-full flex flex-col items-center">
+            
+            <!-- Hero Heading -->
+            <div class="text-center mt-6 mb-12 max-w-3xl">
+                <p class="text-cyan-400 font-semibold mb-2 tracking-widest text-sm uppercase" data-i18n="subtitle">Unified Land Database</p>
+                <h2 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-gray-400 mb-6" data-i18n="tagline">
+                    Verify Property with AI Precision
                 </h2>
-                <p class="text-gray-400 max-w-xl mx-auto">Cross-reference land ownership, encumbrances, and legal
-                    disputes across fragmented government registries in milliseconds.</p>
-            </div>
-
-            <!-- The Glowing Central Form -->
-            <div class="glass-panel rounded-3xl p-8 w-full shadow-2xl relative overflow-hidden group">
-                <!-- Subtle internal highlight -->
-                <div
-                    class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 pointer-events-none">
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 relative z-10">
-                    <div>
-                        <label
-                            class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider">State</label>
-                        <input type="text" placeholder="e.g., Punjab"
-                            class="glass-input w-full p-4 rounded-xl transition">
-                    </div>
-                    <div>
-                        <label
-                            class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider">District</label>
-                        <input type="text" placeholder="e.g., Ludhiana"
-                            class="glass-input w-full p-4 rounded-xl transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider">Khasra /
-                            Survey No.</label>
-                        <input type="text" placeholder="e.g., 45/2"
-                            class="glass-input w-full p-4 rounded-xl transition">
-                    </div>
-                </div>
-
-                <div class="mb-8 relative z-10">
-                    <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider">Upload Sale
-                        Deed (OCR Scan)</label>
-                    <div class="glass-input rounded-xl p-2 flex items-center">
-                        <input type="file"
-                            class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:text-cyan-300 hover:file:bg-cyan-500/30 file:cursor-pointer file:transition">
-                    </div>
-                </div>
-
-                <button onclick="runVerification()"
-                    class="glow-button w-full text-white font-bold text-lg py-4 rounded-xl relative z-10">
-                    Execute Data Check
+                <p class="text-gray-400 text-base md:text-lg mb-8 leading-relaxed" data-i18n="desc">
+                    Cross-reference land ownership, encumbrances, and legal disputes across fragmented government registries in milliseconds.
+                </p>
+                <button onclick="navigateTo('wizard')" class="glow-button px-8 py-4 text-white font-bold text-lg rounded-xl shadow-lg inline-flex items-center gap-2">
+                    <span data-i18n="startBtn">Start Verification</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </button>
             </div>
 
-            <!-- Bottom Feature Cards (Mimicking the Explore/Learn/Share cards) -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 w-full">
-                <div class="glass-panel feature-card rounded-2xl p-6 cursor-pointer">
-                    <div
-                        class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center mb-4 text-blue-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                            </path>
-                        </svg>
-                    </div>
-                    <h3 class="font-bold text-white mb-2">OCR Matching</h3>
-                    <p class="text-xs text-gray-400">Extracts data from uploaded deeds to find physical-to-digital
-                        mismatches.</p>
+            <!-- Dashboard Stats Row -->
+            <div class="flex justify-center w-full max-w-4xl mb-12">
+                <div class="glass-panel rounded-2xl p-6 text-center border-t-2 border-t-emerald-500 w-full max-w-xs shadow-lg shadow-emerald-500/10">
+                    <div class="text-3xl font-black text-emerald-400">1.2s</div>
+                    <div class="text-xs text-gray-400 mt-1 uppercase font-bold tracking-wider">Avg Check Time</div>
                 </div>
-                <div class="glass-panel feature-card rounded-2xl p-6 cursor-pointer border-t border-t-emerald-500/30">
-                    <div class="flex justify-between items-start mb-4">
-                        <div
-                            class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="w-full max-w-5xl mb-12">
+                <h3 class="text-2xl font-bold text-white mb-6 text-center" data-i18n="featuresTitle">Key Platform Features</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-panel feature-card rounded-2xl p-6 border-l-4 border-l-cyan-400">
+                        <div class="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center mb-4 text-cyan-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                         </div>
-                        <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded">Live</span>
+                        <h4 class="font-bold text-white mb-2" data-i18n="ownershipTitle">Ownership Matching</h4>
+                        <p class="text-xs text-gray-400" data-i18n="ownershipDesc">Extracts data from uploaded deeds to find physical-to-digital mismatches.</p>
                     </div>
-                    <h3 class="font-bold text-white mb-2">Encumbrance Check</h3>
-                    <p class="text-xs text-gray-400">Real-time flags for active mortgages or financial liabilities on
-                        the land.</p>
-                </div>
-                <div class="glass-panel feature-card rounded-2xl p-6 cursor-pointer">
-                    <div
-                        class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mb-4 text-purple-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3">
-                            </path>
-                        </svg>
+                    <div class="glass-panel feature-card rounded-2xl p-6 border-l-4 border-l-emerald-500">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4 text-emerald-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        </div>
+                        <h4 class="font-bold text-white mb-2" data-i18n="encumbranceTitle">Encumbrance Check</h4>
+                        <p class="text-xs text-gray-400" data-i18n="encumbranceDesc">Real-time flags for active mortgages or financial liabilities on the land.</p>
                     </div>
-                    <h3 class="font-bold text-white mb-2">Dispute Registry</h3>
-                    <p class="text-xs text-gray-400">Cross-checks court databases for pending litigations or stay
-                        orders.</p>
-                </div>
-                <div class="glass-panel feature-card rounded-2xl p-6 cursor-pointer">
-                    <div
-                        class="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center mb-4 text-cyan-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+                    <div class="glass-panel feature-card rounded-2xl p-6 border-l-4 border-l-purple-500">
+                        <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mb-4 text-purple-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
+                        </div>
+                        <h4 class="font-bold text-white mb-2" data-i18n="disputeTitle">Dispute Registry</h4>
+                        <p class="text-xs text-gray-400" data-i18n="disputeDesc">Cross-checks court databases for pending litigations or stay orders.</p>
                     </div>
-                    <h3 class="font-bold text-white mb-2">Transaction History</h3>
-                    <p class="text-xs text-gray-400">Immutable chronological ledger of all previous ownership transfers.
-                    </p>
+                    <div class="glass-panel feature-card rounded-2xl p-6 border-l-4 border-l-blue-500">
+                        <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center mb-4 text-blue-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        </div>
+                        <h4 class="font-bold text-white mb-2" data-i18n="historyTitle">Transaction History</h4>
+                        <p class="text-xs text-gray-400" data-i18n="historyDesc">Immutable chronological ledger of all previous ownership transfers.</p>
+                    </div>
+                    <div class="glass-panel feature-card rounded-2xl p-6 border-l-4 border-l-green-500">
+                        <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center mb-4 text-green-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </div>
+                        <h4 class="font-bold text-white mb-2" data-i18n="gisTitle">GIS Mapping</h4>
+                        <p class="text-xs text-gray-400" data-i18n="gisDesc">Visualizes the verified land parcel using dark-themed geospatial plotting.</p>
+                    </div>
+                    <div class="glass-panel feature-card rounded-2xl p-6 border-l-4 border-l-yellow-500">
+                        <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center mb-4 text-yellow-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"></path></svg>
+                        </div>
+                        <h4 class="font-bold text-white mb-2" data-i18n="riskTitle">Risk Analysis</h4>
+                        <p class="text-xs text-gray-400" data-i18n="riskDesc">Generates a real-time confidence score flagging critical mismatches.</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Loading State -->
-        <div id="loading-state" class="hidden flex-col items-center justify-center mt-20">
-            <div
-                class="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mb-4 shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+            <!-- History Panel -->
+            <div class="w-full max-w-4xl glass-panel rounded-2xl p-6 mb-12">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2" data-i18n="historyHeader">
+                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Recent Verifications
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-300">
+                        <thead class="bg-white/5 text-gray-400 uppercase text-[10px] tracking-wider">
+                            <tr>
+                                <th class="p-3" data-i18n="historyTableId">Property ID</th>
+                                <th class="p-3" data-i18n="historyTableOwner">Owner Name</th>
+                                <th class="p-3" data-i18n="historyTableDate">Date</th>
+                                <th class="p-3" data-i18n="historyTableScore">Score</th>
+                                <th class="p-3" data-i18n="historyTableRisk">Risk</th>
+                                <th class="p-3" data-i18n="historyTableStatus">Status</th>
+                                <th class="p-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-rows" class="divide-y divide-white/5">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <p class="text-cyan-300 font-bold tracking-widest uppercase animate-pulse">Running OCR & Database
-                Protocols...</p>
-        </div>
+        </section>
 
-        <!-- Results Dashboard -->
-        <div id="results-section" class="hidden w-full max-w-5xl mt-8">
-            <button onclick="resetSearch()"
-                class="mb-6 text-sm text-cyan-400 hover:text-cyan-300 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg> Back to Search
+        <!-- 2. PROPERTY VERIFICATION WIZARD -->
+        <section id="view-wizard" class="hidden w-full max-w-4xl mx-auto">
+            
+            <button onclick="navigateTo('home')" class="mb-6 text-sm text-cyan-400 hover:text-cyan-300 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l-7 7m-7 7h18"></path></svg>
+                <span data-i18n="backSearch">Back to Home</span>
             </button>
 
-            <!-- Risk Score Card -->
-            <div
-                class="glass-panel border-l-4 border-l-red-500 p-6 rounded-2xl mb-8 flex justify-between items-center relative overflow-hidden">
-                <div class="absolute right-0 top-0 w-64 h-64 bg-red-500/10 rounded-full blur-[50px] -z-10"></div>
+            <!-- Verification Center Box -->
+            <!-- Dropdown Mode Box -->
+            <div id="panel-dropdown" class="glass-panel rounded-3xl p-8 shadow-2xl relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 pointer-events-none"></div>
+                
+                <div class="flex justify-between items-center mb-6 pb-2 border-b border-white/5">
+                    <h3 class="text-2xl font-bold text-white flex items-center gap-2" data-i18n="ctaVerify">Verify Property</h3>
+                    <button class="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 font-semibold transition bg-cyan-950/40 px-3.5 py-1.5 rounded-lg border border-cyan-500/20" onclick="toggleLocationMode(true)">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        <span data-i18n="enterManually">Enter Location Manually</span>
+                    </button>
+                </div>
+
+                <!-- Dropdown Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formState">State</label>
+                        <select id="state-select" class="glass-input w-full p-4 rounded-xl transition cursor-pointer text-gray-200">
+                            <option value="" data-i18n="stateSelect">Select State</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formDistrict">District</label>
+                        <select id="district-select" class="glass-input w-full p-4 rounded-xl transition cursor-pointer text-gray-200" disabled>
+                            <option value="" data-i18n="districtSelect">Select District</option>
+                        </select>
+                        <div id="district-custom-container" class="hidden mt-2">
+                            <input id="district-custom-input" type="text" placeholder="Specify District Manually" class="glass-input w-full p-3 rounded-lg transition text-white text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formTehsil">Tehsil</label>
+                        <select id="tehsil-select" class="glass-input w-full p-4 rounded-xl transition cursor-pointer text-gray-200" disabled>
+                            <option value="" data-i18n="tehsilSelect">Select Tehsil</option>
+                        </select>
+                        <div id="tehsil-custom-container" class="hidden mt-2">
+                            <input id="tehsil-custom-input" type="text" placeholder="Specify Tehsil Manually" class="glass-input w-full p-3 rounded-lg transition text-white text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formVillage">Village</label>
+                        <select id="village-select" class="glass-input w-full p-4 rounded-xl transition cursor-pointer text-gray-200" disabled>
+                            <option value="" data-i18n="villageSelect">Select Village</option>
+                        </select>
+                        <div id="village-custom-container" class="hidden mt-2">
+                            <input id="village-custom-input" type="text" placeholder="Specify Village Manually" class="glass-input w-full p-3 rounded-lg transition text-white text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formKhasra">Khasra / Survey No.</label>
+                        <input id="khasra-input" type="text" placeholder="e.g. 123/4" class="glass-input w-full p-4 rounded-xl transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formPropId">Property ID (Optional)</label>
+                        <input id="propid-input" type="text" placeholder="e.g. PROP-001" class="glass-input w-full p-4 rounded-xl transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formOwner">Owner Name (Optional)</label>
+                        <input id="owner-input" type="text" placeholder="e.g. Rajesh Kumar" class="glass-input w-full p-4 rounded-xl transition">
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="searchProperty()" class="glow-button flex-1 text-white font-bold text-md py-4 rounded-xl">
+                        <span data-i18n="searchBtn">Search Property</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Manual Mode Box (Same size and style) -->
+            <div id="panel-manual" class="glass-panel rounded-3xl p-8 shadow-2xl relative overflow-hidden group hidden animate-fade-in">
+                <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 pointer-events-none"></div>
+                
+                <div class="flex justify-between items-center mb-6 pb-2 border-b border-white/5">
+                    <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <span data-i18n="ctaVerify">Verify Property</span>
+                        <span class="text-xs bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2.5 py-0.5 rounded-full uppercase font-bold tracking-wider">Manual Entry</span>
+                    </h3>
+                    <button class="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 font-semibold transition bg-cyan-950/40 px-3.5 py-1.5 rounded-lg border border-cyan-500/20" onclick="toggleLocationMode(false)">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        <span data-i18n="selectDropdown">Select from Dropdowns</span>
+                    </button>
+                </div>
+
+                <!-- Manual Input Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formState">State</label>
+                        <input id="state-input" type="text" placeholder="e.g. Uttar Pradesh" class="glass-input w-full p-4 rounded-xl transition text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formDistrict">District</label>
+                        <input id="district-input" type="text" placeholder="e.g. Lucknow" class="glass-input w-full p-4 rounded-xl transition text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formTehsil">Tehsil</label>
+                        <input id="tehsil-input" type="text" placeholder="e.g. Malihabad" class="glass-input w-full p-4 rounded-xl transition text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formVillage">Village</label>
+                        <input id="village-input" type="text" placeholder="e.g. Malihabad Rural" class="glass-input w-full p-4 rounded-xl transition text-white">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formKhasra">Khasra / Survey No.</label>
+                        <input id="khasra-input-manual" type="text" placeholder="e.g. 123/4" class="glass-input w-full p-4 rounded-xl transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formPropId">Property ID (Optional)</label>
+                        <input id="propid-input-manual" type="text" placeholder="e.g. PROP-001" class="glass-input w-full p-4 rounded-xl transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-cyan-300 mb-2 font-semibold uppercase tracking-wider" data-i18n="formOwner">Owner Name (Optional)</label>
+                        <input id="owner-input-manual" type="text" placeholder="e.g. Rajesh Kumar" class="glass-input w-full p-4 rounded-xl transition">
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="searchProperty()" class="glow-button flex-1 text-white font-bold text-md py-4 rounded-xl">
+                        <span data-i18n="searchBtn">Search Property</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Error Notification -->
+            <div id="search-error" class="hidden mt-6 bg-red-950/40 border border-red-500/40 p-4 rounded-2xl flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
                 <div>
-                    <h3 class="text-2xl font-bold text-white">System Alert: Discrepancies Found</h3>
-                    <p class="text-red-400 font-semibold mt-1">Uploaded document does not match authoritative records.
-                    </p>
+                    <h4 class="font-bold text-white text-sm" data-i18n="errorTitle">Property Not Found</h4>
+                    <p class="text-xs text-gray-400 mt-0.5" data-i18n="errorDesc">No authoritative record matches your query details. Please verify values or use standard demo data.</p>
                 </div>
+            </div>
+
+            <!-- 2.1 GOVERNMENT RECORD PREVIEW -->
+            <div id="gov-record-preview" class="hidden mt-8 glass-panel rounded-2xl p-6 border-l-4 border-l-cyan-400">
+                <h4 class="font-bold text-lg mb-4 text-cyan-400 border-b border-white/10 pb-2 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    <span data-i18n="govDatabase">Govt Database Record (Authoritative)</span>
+                </h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
+                    <div class="flex justify-between border-b border-white/5 pb-2">
+                        <span data-i18n="ownerName">Owner Name</span>
+                        <strong id="prev-owner" class="text-white">-</strong>
+                    </div>
+                    <div class="flex justify-between border-b border-white/5 pb-2">
+                        <span data-i18n="fatherName">Father's Name</span>
+                        <strong id="prev-father" class="text-white">-</strong>
+                    </div>
+                    <div class="flex justify-between border-b border-white/5 pb-2">
+                        <span data-i18n="formKhasra">Khasra / Survey No.</span>
+                        <strong id="prev-khasra" class="text-white">-</strong>
+                    </div>
+                    <div class="flex justify-between border-b border-white/5 pb-2">
+                        <span data-i18n="area">Area</span>
+                        <strong id="prev-area" class="text-white">-</strong>
+                    </div>
+                    <div class="flex justify-between border-b border-white/5 pb-2">
+                        <span data-i18n="registrationNo">Registration Number</span>
+                        <strong id="prev-reg-no" class="text-white">-</strong>
+                    </div>
+                    <div class="flex justify-between border-b border-white/5 pb-2">
+                        <span data-i18n="registrationDate">Registration Date</span>
+                        <strong id="prev-reg-date" class="text-white">-</strong>
+                    </div>
+                    <div class="flex justify-between border-b border-white/5 pb-2">
+                        <span data-i18n="status">Current Status</span>
+                        <strong id="prev-status" class="text-emerald-400 font-semibold">-</strong>
+                    </div>
+                    <div class="flex justify-between border-b border-white/5 pb-2">
+                        <span data-i18n="propAddress">Property Address</span>
+                        <strong id="prev-address" class="text-white truncate max-w-[200px]">-</strong>
+                    </div>
+                </div>
+
+                <!-- 3. DOCUMENT UPLOAD AREA -->
+                <div class="mt-8 pt-6 border-t border-white/10">
+                    <label class="block text-sm text-cyan-300 mb-3 font-semibold uppercase tracking-wider" data-i18n="uploadDeed">Upload Sale Deed (OCR Scan)</label>
+                    
+                    <div id="drop-zone" class="border-2 border-dashed border-white/15 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer hover:border-cyan-500/40 hover:bg-white/[0.01] transition">
+                        <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" class="hidden">
+                        
+                        <svg class="w-12 h-12 text-cyan-500/50 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        
+                        <p class="text-sm font-semibold text-gray-300 text-center" data-i18n="uploadDeedDesc">Drag & drop your document here, or click to browse</p>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <span>Supports PDF, JPG, JPEG, PNG</span>
+                            <span class="mx-2">|</span>
+                            <button type="button" onclick="event.stopPropagation(); simulateFileUpload();" class="text-cyan-400 underline hover:text-cyan-300 font-bold" data-i18n="simUpload">Simulate Sample Upload</button>
+                        </p>
+                    </div>
+
+                    <!-- File Progress & Preview Panel -->
+                    <div id="file-info-panel" class="hidden mt-4 bg-white/5 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            </div>
+                            <div>
+                                <h5 id="info-filename" class="font-bold text-white text-sm truncate max-w-[250px]">-</h5>
+                                <p id="info-filesize" class="text-xs text-gray-400">-</p>
+                            </div>
+                        </div>
+
+                        <!-- Mini Preview (if Image) -->
+                        <div id="info-preview" class="hidden w-16 h-16 rounded border border-white/10 overflow-hidden bg-black/40">
+                            <img id="info-img-preview" class="w-full h-full object-cover" src="" alt="Preview">
+                        </div>
+
+                        <!-- Progress Bar & Analyze Button -->
+                        <div class="flex flex-col gap-2 min-w-[200px]">
+                            <div class="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                                <div id="upload-progress-bar" class="bg-cyan-500 h-full w-full transition-all duration-500"></div>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-cyan-400 font-semibold">100% Uploaded</span>
+                                <button onclick="runOcrAnalysis()" class="glow-button px-4 py-2 text-white font-bold rounded-lg" data-i18n="analyzeBtn">Analyze Document</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3.1 OCR EXTRACTION DISPLAY -->
+                <div id="ocr-extraction-section" class="hidden mt-8 pt-6 border-t border-white/10">
+                    <h4 class="font-bold text-lg mb-4 text-yellow-400 pb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                        <span data-i18n="ocrDatabase">AI Document Extraction (Sale Deed)</span>
+                    </h4>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300 mb-6 bg-yellow-500/5 p-4 rounded-xl border border-yellow-500/10">
+                        <div class="flex justify-between border-b border-white/5 pb-2">
+                            <span data-i18n="ownerName">Owner Name</span>
+                            <strong id="ocr-owner" class="text-white">-</strong>
+                        </div>
+                        <div class="flex justify-between border-b border-white/5 pb-2">
+                            <span data-i18n="fatherName">Father's Name</span>
+                            <strong id="ocr-father" class="text-white">-</strong>
+                        </div>
+                        <div class="flex justify-between border-b border-white/5 pb-2">
+                            <span data-i18n="formKhasra">Khasra / Survey No.</span>
+                            <strong id="ocr-khasra" class="text-white">-</strong>
+                        </div>
+                        <div class="flex justify-between border-b border-white/5 pb-2">
+                            <span data-i18n="area">Area</span>
+                            <strong id="ocr-area" class="text-white">-</strong>
+                        </div>
+                        <div class="flex justify-between border-b border-white/5 pb-2">
+                            <span data-i18n="registrationNo">Registration Number</span>
+                            <strong id="ocr-reg-no" class="text-white">-</strong>
+                        </div>
+                        <div class="flex justify-between border-b border-white/5 pb-2">
+                            <span data-i18n="registrationDate">Registration Date</span>
+                            <strong id="ocr-reg-date" class="text-white">-</strong>
+                        </div>
+                        <div class="flex justify-between border-b border-white/5 pb-2 col-span-1 md:col-span-2">
+                            <span data-i18n="propAddress">Property Address</span>
+                            <strong id="ocr-address" class="text-white">-</strong>
+                        </div>
+                    </div>
+
+                    <button onclick="executeVerification()" class="glow-button w-full text-white font-bold py-4 rounded-xl">
+                        Verify and Calculate Score
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3.2 LOADING STATE -->
+        <section id="view-loading" class="hidden flex-col items-center justify-center mt-12 max-w-md mx-auto glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl">
+            <div class="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mb-6 shadow-[0_0_15px_rgba(6,182,212,0.5)]"></div>
+            <p id="loading-status-text" class="text-cyan-300 font-bold tracking-widest uppercase animate-pulse text-center mb-6 text-sm" data-i18n="analyzing">Running AI OCR & Database Protocols...</p>
+            <div id="loading-steps-list" class="w-full space-y-3 text-sm text-gray-400">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </section>
+
+        <!-- 4. RESULTS DASHBOARD -->
+        <section id="view-results" class="hidden w-full max-w-5xl mx-auto">
+            <button onclick="navigateTo('wizard')" class="mb-6 text-sm text-cyan-400 hover:text-cyan-300 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l-7 7m-7 7h18"></path></svg>
+                <span data-i18n="backSearch">Back to Search</span>
+            </button>
+
+            <!-- Verification Alert / Status Header Bar -->
+            <div id="status-alert-header" class="glass-panel p-6 rounded-2xl mb-8 flex flex-col md:flex-row justify-between items-center relative overflow-hidden">
+                <div id="alert-bg-glow" class="absolute right-0 top-0 w-64 h-64 rounded-full blur-[60px] -z-10"></div>
+                
+                <div class="mb-4 md:mb-0">
+                    <h3 id="alert-title" class="text-2xl font-bold text-white">-</h3>
+                    <p id="alert-desc" class="font-semibold mt-1">-</p>
+                </div>
+                
                 <div class="text-center bg-black/30 px-6 py-3 rounded-xl border border-white/5">
-                    <span class="text-4xl font-black text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">65%</span>
-                    <p class="text-xs text-gray-400 uppercase tracking-wider mt-1">Verification Score</p>
+                    <span id="display-score" class="text-4xl font-black drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">-</span>
+                    <p class="text-xs text-gray-400 uppercase tracking-wider mt-1" data-i18n="riskScore">Verification Score</p>
+                    <span id="risk-badge" class="mt-2 inline-block text-[10px] px-2 py-0.5 rounded font-black">-</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Govt Database -->
-                <div class="glass-panel p-6 rounded-2xl">
-                    <h4
-                        class="font-bold text-lg mb-4 text-cyan-400 border-b border-white/10 pb-2 flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
-                            </path>
-                        </svg>
-                        Govt Database (Authoritative)
-                    </h4>
-                    <div class="space-y-3 text-sm text-gray-300">
-                        <p class="flex justify-between border-b border-white/5 pb-2"><span>Owner:</span> <strong
-                                class="text-white">Rajesh Kumar</strong></p>
-                        <p class="flex justify-between border-b border-white/5 pb-2"><span>Area:</span> <strong
-                                class="text-white">1.5 Hectares</strong></p>
-                        <p class="flex justify-between border-b border-white/5 pb-2"><span>Status:</span> <strong
-                                class="text-red-400 bg-red-500/10 px-2 rounded">Active Mortgage (SBI)</strong></p>
+            <!-- Dynamic Risk Explanation and Recommendation Card -->
+            <div id="risk-explanation-panel" class="hidden mb-8 glass-panel p-6 rounded-2xl border-l-4">
+                <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Score breakdown grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Left Details/Comparison Column (Spans 2) -->
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <!-- Comparison table -->
+                    <div class="glass-panel p-6 rounded-2xl">
+                        <h4 class="font-bold text-lg mb-4 text-white border-b border-white/10 pb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Record Comparison Summary
+                        </h4>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-gray-300">
+                                <thead>
+                                    <tr class="border-b border-white/10 text-gray-400 uppercase text-[10px] tracking-wider">
+                                        <th class="pb-2" data-i18n="field">Field</th>
+                                        <th class="pb-2" data-i18n="govtRecord">Government Record</th>
+                                        <th class="pb-2" data-i18n="saleDeed">Sale Deed</th>
+                                        <th class="pb-2 text-center" data-i18n="matchStatus">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="comparison-rows" class="divide-y divide-white/5">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- GIS Map section -->
+                    <div class="glass-panel p-6 rounded-2xl relative">
+                        <div class="absolute right-6 top-6 bg-cyan-950/40 border border-cyan-500/30 px-3 py-1 rounded text-xs text-cyan-400 z-10 font-bold uppercase tracking-wider" data-i18n="demoGis">Demonstration GIS Data</div>
+                        <h4 class="font-bold text-lg mb-4 text-white border-b border-white/10 pb-2 flex items-center gap-2" data-i18n="geoPlotting">
+                            Geospatial Plotting
+                        </h4>
+                        <!-- Leaflet container -->
+                        <div id="map" class="h-80 w-full rounded-xl border border-white/10 shadow-inner z-0 relative"></div>
+                        <p class="text-[10px] text-gray-500 mt-2 text-right italic" data-i18n="gisDisclaimer">GIS information shown is for prototype demonstration. Boundary lines are simulated.</p>
+                        
+                        <!-- Selected Parcel Details Grid -->
+                        <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-white/[0.02] border border-white/5 rounded-xl text-sm">
+                            <div>
+                                <span class="text-xs text-gray-500 block uppercase font-semibold">Khasra / Gata</span>
+                                <strong id="gis-prev-khasra" class="text-white">-</strong>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block uppercase font-semibold">Owner Name</span>
+                                <strong id="gis-prev-owner" class="text-cyan-400">-</strong>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block uppercase font-semibold">Area (Recorded vs GIS)</span>
+                                <strong id="gis-prev-area" class="text-white">-</strong>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block uppercase font-semibold">GIS Status</span>
+                                <strong id="gis-prev-status" class="text-emerald-400">-</strong>
+                            </div>
+                        </div>
+
+                        <!-- Area discrepancy alert box -->
+                        <div id="gis-area-discrepancy-box" class="mt-3 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs rounded-xl flex items-center gap-2 hidden">
+                            <span class="animate-ping w-2 h-2 rounded-full bg-rose-400"></span>
+                            <span><strong>⚠ Area discrepancy detected:</strong> The GIS calculated area deviates significantly from the official land registry record.</span>
+                        </div>
+
+                        <!-- Fallback Alert Box -->
+                        <p id="gis-fallback-notice" class="text-[10px] text-amber-300 mt-2 italic hidden">
+                            ⚠ Official cadastral data is unavailable for this location. Showing SETU demonstration parcel data. Prototype: Demonstration data is used where official API access is unavailable.
+                        </p>
+
+                        <!-- Data Source label -->
+                        <div class="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-t border-white/5 pt-3">
+                            <div>
+                                <span class="text-xs text-gray-500 block">Data Source</span>
+                                <strong id="gis-prev-source" class="text-xs text-gray-300">-</strong>
+                            </div>
+                            <span id="gis-data-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-cyan-950/40 text-cyan-400 border border-cyan-500/30">DEMO_DATA</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- OCR Extracted -->
-                <div class="glass-panel border border-yellow-500/30 p-6 rounded-2xl relative">
-                    <div class="absolute inset-0 bg-yellow-500/5 rounded-2xl pointer-events-none"></div>
-                    <h4
-                        class="font-bold text-lg mb-4 text-yellow-400 border-b border-white/10 pb-2 flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                            </path>
-                        </svg>
-                        OCR Scan (Uploaded Document)
-                    </h4>
-                    <div class="space-y-3 text-sm text-gray-300 relative z-10">
-                        <p class="flex justify-between border-b border-white/5 pb-2"><span>Owner:</span> <strong
-                                class="text-red-400 underline decoration-red-500/50">Ramesh Kumar</strong> <span
-                                class="text-xs bg-red-500/20 text-red-300 px-1 rounded ml-2">Mismatch</span></p>
-                        <p class="flex justify-between border-b border-white/5 pb-2"><span>Area:</span> <strong
-                                class="text-white">1.5 Hectares</strong></p>
-                        <p class="flex justify-between border-b border-white/5 pb-2"><span>Status:</span> <strong
-                                class="text-white">Clear</strong></p>
+                <!-- Right Liabilities Column (Spans 1) -->
+                <div class="space-y-8">
+                    
+                    <!-- Encumbrance Card -->
+                    <div class="glass-panel p-6 rounded-2xl" id="encumbrance-card">
+                        <h4 class="font-bold text-lg mb-4 text-white border-b border-white/10 pb-2 flex items-center gap-2" data-i18n="encumbranceStatus">
+                            Encumbrance Status
+                        </h4>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-2">
+                                <span id="encumbrance-status-badge" class="px-3 py-1 rounded text-xs font-bold uppercase">-</span>
+                            </div>
+                            <div id="encumbrance-details" class="text-sm text-gray-300 space-y-2 bg-black/20 p-3 rounded-lg border border-white/5">
+                                <!-- Details here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Court dispute card -->
+                    <div class="glass-panel p-6 rounded-2xl" id="litigation-card">
+                        <h4 class="font-bold text-lg mb-4 text-white border-b border-white/10 pb-2 flex items-center gap-2" data-i18n="courtCase">
+                            Court Case / Litigation Status
+                        </h4>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-2">
+                                <span id="litigation-status-badge" class="px-3 py-1 rounded text-xs font-bold uppercase">-</span>
+                            </div>
+                            <div id="litigation-details" class="text-sm text-gray-300 space-y-2 bg-black/20 p-3 rounded-lg border border-white/5">
+                                <!-- Details here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Report Generator Card -->
+                    <div class="glass-panel p-6 rounded-2xl text-center space-y-4 bg-gradient-to-tr from-cyan-950/20 to-transparent">
+                        <svg class="w-12 h-12 text-cyan-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <h5 class="text-white font-bold">Verification Report</h5>
+                        <p class="text-xs text-gray-400">Generate a print-ready security clearance and certificate with full legal details and coordinate plots.</p>
+                        <button onclick="generateReport()" class="glow-button w-full text-white font-bold py-3 rounded-xl" data-i18n="genReport">
+                            Generate Verification Report
+                        </button>
                     </div>
                 </div>
             </div>
-
-            <!-- Map View -->
-            <div class="glass-panel p-6 rounded-2xl mt-8">
-                <h4 class="font-bold text-lg mb-4 text-white border-b border-white/10 pb-2">Geospatial Plotting</h4>
-                <div id="map" class="h-80 w-full rounded-xl z-0 relative z-10 border border-white/10 shadow-inner">
-                </div>
-            </div>
-        </div>
+        </section>
 
     </main>
 
+    <!-- Footer Disclaimer -->
+    <footer class="mt-20 border-t border-white/5 py-8 text-center text-xs text-gray-500 px-4">
+        <p class="max-w-3xl mx-auto mb-2" data-i18n="disclaimer">SETU is currently a prototype. Verification results shown during demonstration use simulated data and are not official government records.</p>
+        <p>© 2026 SETU Portal | Smart India Hackathon | Team Code Seekers</p>
+    </footer>
+
+    <!-- JS Logic -->
     <script>
-        function runVerification() {
-            // 1. Hide search, show loading
-            document.getElementById('search-section').classList.add('hidden');
-            const loadingState = document.getElementById('loading-state');
-            loadingState.classList.remove('hidden');
-            loadingState.classList.add('flex');
+        const DISTRICT_COORDS = {
+            "Ludhiana": [30.9010, 75.8573],
+            "Jalandhar": [31.3260, 75.5762],
+            "Patiala": [30.3400, 76.3800],
+            "Amritsar": [31.6340, 74.8723],
+            "Bathinda": [30.2110, 74.9455],
+            "Gurugram": [28.4595, 77.0266],
+            "Faridabad": [28.4089, 77.3178],
+            "Panipat": [29.3909, 76.9635],
+            "Ambala": [30.3752, 76.7794],
+            "Hisar": [29.1492, 75.7217],
+            "Mumbai City": [18.9696, 72.8202],
+            "Pune": [18.5204, 73.8567],
+            "Nagpur": [21.1458, 79.0882],
+            "Thane": [19.2183, 72.9781],
+            "Nashik": [19.9975, 73.7898],
+            "Bengaluru Urban": [12.9716, 77.5946],
+            "Mysuru": [12.2958, 76.6394],
+            "Hubballi-Dharwad": [15.3647, 75.1240],
+            "Mangaluru": [12.9141, 74.8560],
+            "Belagavi": [15.8497, 74.4977],
+            "New Delhi": [28.6139, 77.2090],
+            "North Delhi": [28.7500, 77.1500],
+            "South Delhi": [28.5000, 77.2000],
+            "West Delhi": [28.6500, 77.1000],
+            "Lucknow": [26.8467, 80.9462],
+            "Gautam Buddha Nagar (Noida)": [28.5355, 77.3910],
+            "Kanpur Nagar": [26.4499, 80.3319],
+            "Agra": [27.1767, 78.0081],
+            "Varanasi": [25.3176, 82.9739],
+            "Chennai": [13.0827, 80.2707],
+            "Coimbatore": [11.0168, 76.9558],
+            "Madurai": [9.9252, 78.1198],
+            "Salem": [11.6643, 78.1460],
+            "Trichy": [10.7905, 78.7047],
+            "Ahmedabad": [23.0225, 72.5714],
+            "Surat": [21.1702, 72.8311],
+            "Vadodara": [22.3072, 73.1812],
+            "Rajkot": [22.3039, 70.8022],
+            "Gandhinagar": [23.2156, 72.6369],
+            "Jaipur": [26.9124, 75.7873],
+            "Jodhpur": [26.2389, 73.0243],
+            "Udaipur": [24.5854, 73.7125],
+            "Kota": [25.2138, 75.8648],
+            "Bikaner": [28.0164, 73.3116],
+            "Kolkata": [22.5726, 88.3639],
+            "Howrah": [22.5735, 88.2636],
+            "Darjeeling": [27.0410, 88.2627],
+            "Asansol": [23.6740, 86.9521],
+            "Siliguri": [26.7271, 88.3953]
+        };
 
-            // 2. Wait exactly 3 seconds, then show results
-            setTimeout(() => {
-                loadingState.classList.add('hidden');
-                loadingState.classList.remove('flex');
-                document.getElementById('results-section').classList.remove('hidden');
+        const STATE_COORDS = {
+            "Punjab": [30.9010, 75.8573],
+            "Haryana": [29.0588, 76.0856],
+            "Maharashtra": [19.7515, 75.7139],
+            "Karnataka": [15.3173, 75.7139],
+            "Delhi": [28.7041, 77.1025],
+            "Uttar Pradesh": [26.8467, 80.9462],
+            "Tamil Nadu": [11.1271, 78.6569],
+            "Gujarat": [22.2587, 71.1924],
+            "Rajasthan": [27.0238, 74.2179],
+            "West Bengal": [22.9868, 87.8550]
+        };
 
-                // 3. Load the Map
-                if (!window.myMap) {
-                    window.myMap = L.map('map').setView([30.900965, 75.857277], 15);
-
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                        maxZoom: 19,
-                        attribution: '© OpenStreetMap'
-                    }).addTo(window.myMap);
-
-                    var popupHtml = `<div style="background:#0f172a; color:white; padding:5px; border-radius:5px;">
-                                        <b style="color:#ef4444;">Khasra 45/2</b><br>
-                                        <span style="color:#9ca3af;">Flagged for review</span>
-                                     </div>`;
-
-                    L.marker([30.900965, 75.857277]).addTo(window.myMap)
-                        .bindPopup(popupHtml)
-                        .openPopup();
-                }
-            }, 3000);
+        function getLocationCoords(state, district) {
+            if (district && DISTRICT_COORDS[district]) {
+                const lat = DISTRICT_COORDS[district][0];
+                const lon = DISTRICT_COORDS[district][1];
+                const offsetLat = (district.length % 5) * 0.003 - 0.006;
+                const offsetLon = (district.length % 7) * 0.003 - 0.009;
+                return [lat + offsetLat, lon + offsetLon];
+            }
+            if (state && STATE_COORDS[state]) {
+                return STATE_COORDS[state];
+            }
+            return [26.8467, 80.9462]; // Default Lucknow
         }
 
-        function resetSearch() {
-            document.getElementById('results-section').classList.add('hidden');
-            document.getElementById('search-section').classList.remove('hidden');
+        function calculateParcelArea(geometry) {
+            if (!geometry || geometry.type !== 'Polygon') return 0;
+            const coords = geometry.coordinates[0];
+            if (coords.length < 3) return 0;
+            
+            // Calculate average latitude to determine cos factor
+            let sumLat = 0;
+            coords.forEach(pt => sumLat += pt[1]);
+            const avgLat = (sumLat / coords.length) * Math.PI / 180;
+            const cosLat = Math.cos(avgLat);
+            
+            // Project to flat coordinates in meters
+            const projected = coords.map(pt => {
+                const x = pt[0] * 111320 * cosLat;
+                const y = pt[1] * 110540;
+                return [x, y];
+            });
+            
+            // Shoelace formula
+            let area = 0;
+            const n = projected.length;
+            for (let i = 0; i < n; i++) {
+                const j = (i + 1) % n;
+                area += projected[i][0] * projected[j][1];
+                area -= projected[j][0] * projected[i][1];
+            }
+            area = Math.abs(area) / 2;
+            
+            // Convert to acres (1 acre = 4046.856 sq meters)
+            const acres = area / 4046.856;
+            return parseFloat(acres.toFixed(2));
+        }
+
+        // Reusable GIS, Land Record and Cadastral Service Architecture
+        const SETUServices = {
+            gisService: {
+                calculateParcelArea(geometry) {
+                    return calculateParcelArea(geometry);
+                },
+                getPropertyGeometry(prop) {
+                    return prop ? prop.geometry : null;
+                },
+                fitMapToBounds(map, layer) {
+                    if (map && layer) {
+                        map.fitBounds(layer.getBounds());
+                    }
+                }
+            },
+            landRecordService: {
+                searchProperty(state, district, tehsil, village, khasra, propId) {
+                    const searchKey = (propId || khasra || "").toLowerCase();
+                    if (!searchKey) return null;
+                    for (const pid in clientPropertiesDb) {
+                        const p = clientPropertiesDb[pid];
+                        const sState = String(state || "").toLowerCase();
+                        const sDist = String(district || "").toLowerCase();
+                        const sTeh = String(tehsil || "").toLowerCase();
+                        const sVil = String(village || "").toLowerCase();
+                        
+                        const stateMatches = !state || p.state.toLowerCase() === sState;
+                        const distMatches = !district || p.district.toLowerCase() === sDist;
+                        const tehMatches = !tehsil || p.tehsil.toLowerCase() === sTeh;
+                        const vilMatches = !village || p.village.toLowerCase() === sVil;
+
+                        if (stateMatches && distMatches && tehMatches && vilMatches) {
+                            if (p.id.toLowerCase() === searchKey || p.khasra.toLowerCase() === searchKey) {
+                                return p;
+                            }
+                        }
+                    }
+                    return null;
+                }
+            },
+            cadastralService: {
+                getNeighbours(property) {
+                    const neighbours = [];
+                    if (!property) return neighbours;
+                    for (const pid in clientPropertiesDb) {
+                        const p = clientPropertiesDb[pid];
+                        if (p.id !== property.id && p.village === property.village && p.tehsil === property.tehsil) {
+                            neighbours.push(p);
+                        }
+                    }
+                    return neighbours;
+                }
+            }
+        };
+
+        const API_URL = "http://127.0.0.1:5005/api";
+        let isBackendAvailable = false;
+        
+        // Client-side Mock Database (Normalized with UP Malihabad properties and valid adjacent GeoJSON polygons)
+        const clientPropertiesDb = {
+            "PROP-001": {
+                "propertyId": "PROP-001",
+                "id": "PROP-001",
+                "state": "Uttar Pradesh",
+                "district": "Lucknow",
+                "tehsil": "Malihabad",
+                "village": "Malihabad Rural",
+                "khasraNumber": "123/4",
+                "khasra": "123/4",
+                "ownerName": "Rajesh Kumar",
+                "fatherName": "Ram Lal",
+                "area": 2.50,
+                "propertyType": "Agricultural Land",
+                "registrationNumber": "REG-2025-0192",
+                "registrationDate": "2025-06-12",
+                "status": "Active Mortgage (SBI)",
+                "mortgage": "State Bank of India",
+                "mortgageAmount": "18,50,000",
+                "mortgageDate": "15/08/2024",
+                "courtCase": "None",
+                "coordinates": [26.92046, 80.7105],
+                "latitude": 26.92046,
+                "longitude": 80.7105,
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [ [80.7100, 26.9200], [80.7110, 26.9200], [80.7110, 26.92092], [80.7100, 26.92092], [80.7100, 26.9200] ]
+                    ]
+                },
+                "address": "Malihabad Rural, Malihabad, Lucknow, Uttar Pradesh",
+                "source": "SETU Demonstration Dataset",
+                "sourceType": "DEMO_DATA"
+            },
+            "PROP-002": {
+                "propertyId": "PROP-002",
+                "id": "PROP-002",
+                "state": "Uttar Pradesh",
+                "district": "Lucknow",
+                "tehsil": "Malihabad",
+                "village": "Malihabad Rural",
+                "khasraNumber": "123/5",
+                "khasra": "123/5",
+                "ownerName": "Amit Sharma",
+                "fatherName": "Som Nath",
+                "area": 1.80,
+                "propertyType": "Residential Plot",
+                "registrationNumber": "REG-2025-0456",
+                "registrationDate": "2025-08-20",
+                "status": "Clear",
+                "mortgage": "None",
+                "courtCase": "None",
+                "coordinates": [26.92046, 80.7114],
+                "latitude": 26.92046,
+                "longitude": 80.7114,
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [ [80.7110, 26.9200], [80.71173, 26.9200], [80.71173, 26.92092], [80.7110, 26.92092], [80.7110, 26.9200] ]
+                    ]
+                },
+                "address": "Malihabad Rural, Malihabad, Lucknow, Uttar Pradesh",
+                "source": "SETU Demonstration Dataset",
+                "sourceType": "DEMO_DATA"
+            },
+            "PROP-003": {
+                "propertyId": "PROP-003",
+                "id": "PROP-003",
+                "state": "Uttar Pradesh",
+                "district": "Lucknow",
+                "tehsil": "Malihabad",
+                "village": "Malihabad Rural",
+                "khasraNumber": "123/6",
+                "khasra": "123/6",
+                "ownerName": "Sunita Devi",
+                "fatherName": "Jagdish Prasad",
+                "area": 3.20,
+                "propertyType": "Commercial Land",
+                "registrationNumber": "REG-2025-0789",
+                "registrationDate": "2025-04-15",
+                "status": "Active Mortgage (HDFC)",
+                "mortgage": "HDFC Bank",
+                "mortgageAmount": "25,00,000",
+                "mortgageDate": "10/01/2025",
+                "courtCase": {
+                    "caseId": "CIV/2025/0789",
+                    "court": "Lucknow District Court",
+                    "status": "Pending",
+                    "issue": "Ownership dispute among siblings"
+                },
+                "coordinates": [26.92046, 80.71235],
+                "latitude": 26.92046,
+                "longitude": 80.71235,
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [ [80.71173, 26.9200], [80.71302, 26.9200], [80.71302, 26.92092], [80.71173, 26.92092], [80.71173, 26.9200] ]
+                    ]
+                },
+                "address": "Malihabad Rural, Malihabad, Lucknow, Uttar Pradesh",
+                "source": "SETU Demonstration Dataset",
+                "sourceType": "DEMO_DATA"
+            },
+            "PROP-004": {
+                "propertyId": "PROP-004",
+                "id": "PROP-004",
+                "state": "Uttar Pradesh",
+                "district": "Lucknow",
+                "tehsil": "Malihabad",
+                "village": "Malihabad Rural",
+                "khasraNumber": "124/1",
+                "khasra": "124/1",
+                "ownerName": "Mohan Singh",
+                "fatherName": "Gurnam Singh",
+                "area": 1.20,
+                "propertyType": "Agricultural Land",
+                "registrationNumber": "REG-2025-0222",
+                "registrationDate": "2025-03-10",
+                "status": "Clear",
+                "mortgage": "None",
+                "courtCase": "None",
+                "coordinates": [26.92135, 80.71025],
+                "latitude": 26.92135,
+                "longitude": 80.71025,
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [ [80.7100, 26.92092], [80.7105, 26.92092], [80.7105, 26.92178], [80.7100, 26.92178], [80.7100, 26.92092] ]
+                    ]
+                },
+                "address": "Malihabad Rural, Malihabad, Lucknow, Uttar Pradesh",
+                "source": "SETU Demonstration Dataset",
+                "sourceType": "DEMO_DATA"
+            },
+            "PROP-005": {
+                "propertyId": "PROP-005",
+                "id": "PROP-005",
+                "state": "Uttar Pradesh",
+                "district": "Lucknow",
+                "tehsil": "Malihabad",
+                "village": "Malihabad Rural",
+                "khasraNumber": "124/2",
+                "khasra": "124/2",
+                "ownerName": "Priya Gupta",
+                "fatherName": "Ramesh Gupta",
+                "area": 4.10,
+                "propertyType": "Industrial Plot",
+                "registrationNumber": "REG-2025-0555",
+                "registrationDate": "2025-07-05",
+                "status": "Clear",
+                "mortgage": "None",
+                "courtCase": "None",
+                "coordinates": [26.92135, 80.7113],
+                "latitude": 26.92135,
+                "longitude": 80.7113,
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [ [80.7105, 26.92092], [80.71216, 26.92092], [80.71216, 26.92178], [80.7105, 26.92178], [80.7105, 26.92092] ]
+                    ]
+                },
+                "address": "Malihabad Rural, Malihabad, Lucknow, Uttar Pradesh",
+                "source": "SETU Demonstration Dataset",
+                "sourceType": "DEMO_DATA"
+            }
+        };
+
+        // State/District/Tehsil/Village hierarchy mapping (Expanded to cover major Indian states)
+        const statesList = ["Punjab", "Haryana", "Maharashtra", "Karnataka", "Delhi", "Uttar Pradesh", "Tamil Nadu", "Gujarat", "Rajasthan", "West Bengal"];
+        const districtsList = {
+            "Punjab": ["Ludhiana", "Jalandhar", "Patiala", "Amritsar", "Bathinda"],
+            "Haryana": ["Gurugram", "Faridabad", "Panipat", "Ambala", "Hisar"],
+            "Maharashtra": ["Mumbai City", "Pune", "Nagpur", "Thane", "Nashik"],
+            "Karnataka": ["Bengaluru Urban", "Mysuru", "Hubballi-Dharwad", "Mangaluru", "Belagavi"],
+            "Delhi": ["New Delhi", "North Delhi", "South Delhi", "West Delhi"],
+            "Uttar Pradesh": ["Lucknow", "Gautam Buddha Nagar (Noida)", "Kanpur Nagar", "Agra", "Varanasi"],
+            "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Salem", "Trichy"],
+            "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Gandhinagar"],
+            "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Bikaner"],
+            "West Bengal": ["Kolkata", "Howrah", "Darjeeling", "Asansol", "Siliguri"]
+        };
+        const tehsilsList = {
+            "Ludhiana": ["Ludhiana East", "Ludhiana West", "Khanna", "Payal", "Samrala"],
+            "Jalandhar": ["Jalandhar West", "Jalandhar East", "Nakodar", "Phillaur"],
+            "Patiala": ["Nabha", "Patiala", "Rajpura", "Samana"],
+            "Amritsar": ["Amritsar I", "Amritsar II", "Ajnala", "Baba Bakala"],
+            "Bathinda": ["Bathinda", "Talwandi Sabo", "Rampura Phul"],
+            "Gurugram": ["Gurugram", "Sohna", "Pataudi", "Farrukhnagar"],
+            "Faridabad": ["Faridabad", "Ballabhgarh", "Badkhal"],
+            "Mumbai City": ["Colaba", "Fort", "Dharavi", "Byculla"],
+            "Pune": ["Pune City", "Haveli", "Baramati", "Maval"],
+            "Bengaluru Urban": ["Bengaluru North", "Bengaluru South", "Bengaluru East", "Yelahanka"],
+            "New Delhi": ["Chanakyapuri", "Connaught Place", "Delhi Cantonment"],
+            "Lucknow": ["Lucknow", "Malihabad", "Bakshi Ka Talab"],
+            "Gautam Buddha Nagar (Noida)": ["Sadar Noida", "Dadri", "Jewar"]
+        };
+        const villagesList = {
+            "Ludhiana East": ["Gill", "Mundian Kalan", "Jamalpur"],
+            "Ludhiana West": ["Barewal", "Ayali Kalan", "Sunet"],
+            "Khanna": ["Bhamian", "Alour", "Dahaur"],
+            "Jalandhar West": ["Mithapur", "Kabir Nagar", "Basti Guzan"],
+            "Nabha": ["Alohran", "Bhadson", "Nabha Rural"],
+            "Gurugram": ["Sukhrali", "Wazirabad", "Kanhai"],
+            "Sohna": ["Badshahpur", "Bhondsi", "Sohna Rural"],
+            "Pune City": ["Shivajinagar", "Kothrud", "Hadapsar"],
+            "Bengaluru North": ["Hebbal", "Yeshwanthpur", "Peenya"],
+            "Sadar Noida": ["Sector 15", "Sector 62", "Noida Extension"],
+            "Malihabad": ["Malihabad Rural", "Kasmandi", "Dilawarnagar"]
+        };
+        const propertyMappings = {
+            "Malihabad Rural": "PROP-001",
+            "Kasmandi": "PROP-002",
+            "Dilawarnagar": "PROP-003",
+            "Gill": "PROP-001",
+            "Barewal": "PROP-002",
+            "Bhamian": "PROP-003",
+            "Mithapur": "PROP-004",
+            "Alohran": "PROP-005"
+        };
+
+        // Multilingual dictionary
+        const i18n = {
+            en: {
+                enterManually: "Enter Location Manually",
+                selectDropdown: "Select from Dropdowns",
+                locationDetails: "Location Details",
+                title: "SETU – AI Land Verification Portal",
+                subtitle: "Unified Land Database",
+                tagline: "Verify Property with AI Precision",
+                desc: "Cross-reference land ownership, encumbrances, and legal disputes across fragmented government registries in milliseconds.",
+                startBtn: "Start Verification",
+                ctaVerify: "Verify Property",
+                featuresTitle: "Key Platform Features",
+                ownershipTitle: "Ownership Matching",
+                ownershipDesc: "Extracts data from uploaded deeds to find physical-to-digital mismatches.",
+                encumbranceTitle: "Encumbrance Check",
+                encumbranceDesc: "Real-time flags for active mortgages or financial liabilities on the land.",
+                disputeTitle: "Dispute Registry",
+                disputeDesc: "Cross-checks court databases for pending litigations or stay orders.",
+                historyTitle: "Transaction History",
+                historyDesc: "Immutable chronological ledger of all previous ownership transfers.",
+                gisTitle: "GIS Mapping",
+                gisDesc: "Visualizes the verified land parcel using dark-themed geospatial plotting.",
+                riskTitle: "Risk Analysis",
+                riskDesc: "Generates a real-time confidence score flagging critical mismatches.",
+                formState: "State",
+                formDistrict: "District",
+                formTehsil: "Tehsil",
+                formVillage: "Village",
+                formKhasra: "Khasra / Survey Number",
+                formPropId: "Property ID (Optional)",
+                formOwner: "Owner Name (Optional)",
+                searchBtn: "Search Property",
+                uploadDeed: "Upload Sale Deed (OCR Scan)",
+                uploadDeedDesc: "Drag & drop your document here, or click to browse",
+                analyzeBtn: "Analyze Document",
+                analyzing: "Running AI OCR & Database Protocols...",
+                backSearch: "Back to Search",
+                govDatabase: "Govt Database Record (Authoritative)",
+                ocrDatabase: "AI Document Extraction (Sale Deed)",
+                verificationDashboard: "Verification Result Dashboard",
+                riskScore: "Verification Score",
+                riskLevel: "Risk Level",
+                lowRisk: "LOW RISK",
+                mediumRisk: "MEDIUM RISK",
+                highRisk: "HIGH RISK",
+                ownerName: "Owner Name",
+                area: "Area (Acres)",
+                status: "Current Status",
+                registrationNo: "Registration Number",
+                registrationDate: "Registration Date",
+                fatherName: "Father's Name",
+                propAddress: "Property Address",
+                encumbranceStatus: "Encumbrance Status",
+                activeMortgage: "Active Mortgage Detected",
+                clearMortgage: "No Encumbrances Found",
+                courtCase: "Court Case / Litigation Status",
+                activeLitigation: "Active Litigation Found",
+                clearLitigation: "No Pending Court Cases",
+                field: "Field",
+                govtRecord: "Government Record",
+                saleDeed: "Sale Deed",
+                matchStatus: "Status",
+                match: "Match",
+                partialMatch: "Partial Match",
+                mismatch: "Mismatch",
+                geoPlotting: "Geospatial Plotting",
+                demoGis: "Demonstration GIS Data - Simulated boundaries",
+                genReport: "Generate Verification Report",
+                historyHeader: "Recent Verifications",
+                noHistory: "No verification history found.",
+                historyTableId: "Property ID",
+                historyTableOwner: "Owner Name",
+                historyTableDate: "Date",
+                historyTableScore: "Score",
+                historyTableRisk: "Risk",
+                historyTableStatus: "Status",
+                disclaimer: "SETU is currently a prototype. Verification results shown during demonstration use simulated data and are not official government records.",
+                prototypeLabel: "Prototype – Demonstration Data",
+                issuesFound: "Issues Found",
+                verified: "Verified",
+                viewReport: "View",
+                tehsilSelect: "Select Tehsil",
+                villageSelect: "Select Village",
+                districtSelect: "Select District",
+                stateSelect: "Select State",
+                errorTitle: "Property Not Found",
+                errorDesc: "No authoritative record matches your query details. Please verify values or use standard demo data.",
+                gisDisclaimer: "GIS information shown is for prototype demonstration. Boundary lines are simulated.",
+                simUpload: "Simulate Sample Upload"
+            },
+            hi: {
+                enterManually: "मैन्युअल रूप से दर्ज करें",
+                selectDropdown: "ड्रॉपडाउन से चुनें",
+                locationDetails: "स्थान विवरण",
+                title: "सेतु – एआई भूमि सत्यापन पोर्टल",
+                subtitle: "एकीकृत भूमि डेटाबेस",
+                tagline: "एआई सटीकता के साथ भूमि का सत्यापन करें",
+                desc: "कुछ ही मिलीसेकंड में खंडित सरकारी रजिस्ट्रियों में भूमि के स्वामित्व, ऋणभार और कानूनी विवादों का मिलान करें।",
+                startBtn: "सत्यापन शुरू करें",
+                ctaVerify: "संपत्ति सत्यापित करें",
+                featuresTitle: "मंच की मुख्य विशेषताएं",
+                ownershipTitle: "स्वामित्व मिलान",
+                ownershipDesc: "भौतिक और डिजिटल विसंगतियों को खोजने के लिए अपलोड किए गए दस्तावेजों से डेटा निकालता है।",
+                encumbranceTitle: "ऋणभार जाँच",
+                encumbranceDesc: "भूमि पर सक्रिय बंधक या वित्तीय देनदारियों के लिए वास्तविक समय अलर्ट।",
+                disputeTitle: "विवाद रजिस्ट्री",
+                disputeDesc: "लंबित मुकदमों या स्थगन आदेशों के लिए कोर्ट डेटाबेस की जाँच करता है।",
+                historyTitle: "लेनदेन इतिहास",
+                historyDesc: "पिछले सभी स्वामित्व हस्तांतरणों का अपरिवर्तनीय कालानुक्रमिक खाता।",
+                gisTitle: "जीआईएस मानचित्रण",
+                gisDesc: "डार्क-थीम वाले भू-स्थानिक आलेखन का उपयोग करके सत्यापित भूमि पार्सल को दिखाता है।",
+                riskTitle: "जोखिम विश्लेषण",
+                riskDesc: "महत्वपूर्ण विसंगतियों को चिह्नित करते हुए वास्तविक समय जोखिम स्कोर उत्पन्न करता है।",
+                formState: "राज्य",
+                formDistrict: "जिला",
+                formTehsil: "तहसील",
+                formVillage: "गाँव",
+                formKhasra: "खसरा / सर्वेक्षण संख्या",
+                formPropId: "संपत्ति आईडी (वैकल्पिक)",
+                formOwner: "मालिक का नाम (वैकल्पिक)",
+                searchBtn: "संपत्ति खोजें",
+                uploadDeed: "बिक्री विलेख अपलोड करें (ओसीआर स्कैन)",
+                uploadDeedDesc: "दस्तावेज़ को यहाँ खींचें और छोड़ें, या ब्राउज़ करने के लिए क्लिक करें",
+                analyzeBtn: "दस्तावेज़ का विश्लेषण करें",
+                analyzing: "एआई ओसीआर और डेटाबेस प्रोटोकॉल चल रहे हैं...",
+                backSearch: "खोज पर वापस जाएं",
+                govDatabase: "सरकारी डेटाबेस रिकॉर्ड (आधिकारिक)",
+                ocrDatabase: "एआई दस्तावेज़ निष्कर्षण (बिक्री विलेख)",
+                verificationDashboard: "सत्यापन परिणाम डैशबोर्ड",
+                riskScore: "सत्यापन स्कोर",
+                riskLevel: "जोखिम स्तर",
+                lowRisk: "कम जोखिम",
+                mediumRisk: "मध्यम जोखिम",
+                highRisk: "उच्च जोखिम",
+                ownerName: "मालिक का नाम",
+                area: "क्षेत्रफल (एकड़)",
+                status: "वर्तमान स्थिति",
+                registrationNo: "पंजीकरण संख्या",
+                registrationDate: "पंजीकरण तिथि",
+                fatherName: "पिता का नाम",
+                propAddress: "संपत्ति का पता",
+                encumbranceStatus: "ऋणभार स्थिति",
+                activeMortgage: "सक्रिय बंधक पाया गया",
+                clearMortgage: "कोई ऋणभार नहीं मिला",
+                courtCase: "न्यायालय मामला / मुकदमेबाजी की स्थिति",
+                activeLitigation: "सक्रिय मुकदमेबाजी पाई गई",
+                clearLitigation: "कोई लंबित अदालत का मामला नहीं",
+                field: "क्षेत्र",
+                govtRecord: "सरकारी रिकॉर्ड",
+                saleDeed: "बिक्री विलेख",
+                matchStatus: "स्थिति",
+                match: "सफल मिलान",
+                partialMatch: "आंशिक मिलान",
+                mismatch: "मेल नहीं खाता",
+                geoPlotting: "भू-स्थानिक आलेखन",
+                demoGis: "प्रदर्शन जीआईएस डेटा - सिमुलेटेड सीमाएं",
+                genReport: "सत्यापन रिपोर्ट तैयार करें",
+                historyHeader: "हाल के सत्यापन",
+                noHistory: "कोई सत्यापन इतिहास नहीं मिला।",
+                historyTableId: "संपत्ति आईडी",
+                historyTableOwner: "मालिक का नाम",
+                historyTableDate: "तारीख",
+                historyTableScore: "स्कोर",
+                historyTableRisk: "जोखिम",
+                historyTableStatus: "स्थिति",
+                disclaimer: "सेतु वर्तमान में एक प्रोटोटाइप है। प्रदर्शन के दौरान दिखाए गए सत्यापन परिणाम नकली डेटा का उपयोग करते हैं और आधिकारिक सरकारी रिकॉर्ड नहीं हैं।",
+                prototypeLabel: "प्रोटोटाइप - प्रदर्शन डेटा",
+                issuesFound: "त्रुटियां मिलीं",
+                verified: "सत्यापित",
+                viewReport: "देखें",
+                tehsilSelect: "तहसील चुनें",
+                villageSelect: "गाँव चुनें",
+                districtSelect: "जिला चुनें",
+                stateSelect: "राज्य चुनें",
+                errorTitle: "संपत्ति नहीं मिली",
+                errorDesc: "आपके खोज विवरण से कोई आधिकारिक रिकॉर्ड मेल नहीं खाता है। कृपया मानों की जांच करें या मानक डेमो डेटा का उपयोग करें।",
+                gisDisclaimer: "दिखाई गई जीआईएस जानकारी केवल प्रोटोटाइप प्रदर्शन के लिए है। सीमाएं सिमुलेटेड हैं।",
+                simUpload: "नमूना विलेख अपलोड सिमुलेट करें"
+            }
+        };
+
+        let currentLang = "en";
+        let currentProperty = null;
+        let uploadedFile = null;
+        let extractedData = null;
+        let comparisonResult = null;
+        let currentScore = 0;
+        let currentRisk = "LOW";
+        let myMap = null;
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            checkBackendConnection();
+            populateStatesDropdown();
+            setupDropdownListeners();
+            setupDragAndDrop();
+            renderHistoryTable();
+            setLanguage("en");
+        });
+
+        // 1. Navigation Controller
+        function navigateTo(viewName) {
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-wizard').classList.add('hidden');
+            document.getElementById('view-results').classList.add('hidden');
+            document.getElementById('view-loading').classList.add('hidden');
+
+            if (viewName === 'home') {
+                document.getElementById('view-home').classList.remove('hidden');
+                renderHistoryTable();
+            } else if (viewName === 'wizard') {
+                document.getElementById('view-wizard').classList.remove('hidden');
+            } else if (viewName === 'results') {
+                document.getElementById('view-results').classList.remove('hidden');
+                setTimeout(() => {
+                    initializeMap();
+                }, 100);
+            }
+        }
+
+        // Show toast or notice on non-active buttons
+        function showFeatureNotice(name) {
+            if (name === 'Document AI') {
+                navigateTo('wizard');
+                if (currentProperty) {
+                    setTimeout(() => {
+                        const uploadArea = document.getElementById('gov-record-preview');
+                        if (uploadArea) uploadArea.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                } else {
+                    alert(currentLang === 'hi' ? 
+                        "कृपया बिक्री विलेख का विश्लेषण करने के लिए पहले एक संपत्ति खोजें।" : 
+                        "Please search for a property first to analyze its sale deed.");
+                }
+            } else if (name === 'Dispute Registry') {
+                if (currentProperty && comparisonResult) {
+                    navigateTo('results');
+                    setTimeout(() => {
+                        const litCard = document.getElementById('litigation-card');
+                        if (litCard) litCard.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                } else {
+                    navigateTo('wizard');
+                    setTimeout(() => {
+                        alert(currentLang === 'hi' ? 
+                            "सक्रिय अदालती विवादों की जाँच करने के लिए कृपया पहले एक संपत्ति खोजें।" : 
+                            "Please search for a property first to review its active court dispute records.");
+                    }, 100);
+                }
+            } else {
+                alert(`This is a high-fidelity prototype. The ${name} feature is simulated.`);
+            }
+        }
+
+        let isManualLocationMode = false;
+        function toggleLocationMode(toManual) {
+            isManualLocationMode = toManual;
+            const panelDropdown = document.getElementById('panel-dropdown');
+            const panelManual = document.getElementById('panel-manual');
+            
+            if (isManualLocationMode) {
+                panelDropdown.classList.add('hidden');
+                panelManual.classList.remove('hidden');
+            } else {
+                panelDropdown.classList.remove('hidden');
+                panelManual.classList.add('hidden');
+            }
+            setLanguage(currentLang);
+        }
+
+        // 2. Multilingual dictionary translator
+        function setLanguage(lang) {
+            currentLang = lang;
+            
+            // Map text labels
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang] && i18n[lang][key]) {
+                    el.innerHTML = i18n[lang][key];
+                }
+            });
+
+            // Handle placeholders
+            const khasraInput = document.getElementById('khasra-input');
+            const propidInput = document.getElementById('propid-input');
+            const ownerInput = document.getElementById('owner-input');
+            
+            const khasraInputManual = document.getElementById('khasra-input-manual');
+            const propidInputManual = document.getElementById('propid-input-manual');
+            const ownerInputManual = document.getElementById('owner-input-manual');
+            
+            const stateInput = document.getElementById('state-input');
+            const districtInput = document.getElementById('district-input');
+            const tehsilInput = document.getElementById('tehsil-input');
+            const villageInput = document.getElementById('village-input');
+
+            if (lang === 'hi') {
+                if (khasraInput) khasraInput.placeholder = "उदा. 123/4";
+                if (propidInput) propidInput.placeholder = "उदा. PROP-001";
+                if (ownerInput) ownerInput.placeholder = "उदा. राजेश कुमार";
+
+                if (khasraInputManual) khasraInputManual.placeholder = "उदा. 123/4";
+                if (propidInputManual) propidInputManual.placeholder = "उदा. PROP-001";
+                if (ownerInputManual) ownerInputManual.placeholder = "उदा. राजेश कुमार";
+
+                if (stateInput) stateInput.placeholder = "उदा. पंजाब";
+                if (districtInput) districtInput.placeholder = "उदा. लुधियाना";
+                if (tehsilInput) tehsilInput.placeholder = "उदा. लुधियाना पश्चिम";
+                if (villageInput) villageInput.placeholder = "उदा. बारेवाल";
+            } else {
+                if (khasraInput) khasraInput.placeholder = "e.g. 123/4";
+                if (propidInput) propidInput.placeholder = "e.g. PROP-001";
+                if (ownerInput) ownerInput.placeholder = "e.g. Rajesh Kumar";
+
+                if (khasraInputManual) khasraInputManual.placeholder = "e.g. 123/4";
+                if (propidInputManual) propidInputManual.placeholder = "e.g. PROP-001";
+                if (ownerInputManual) ownerInputManual.placeholder = "e.g. Rajesh Kumar";
+
+                if (stateInput) stateInput.placeholder = "e.g. Uttar Pradesh";
+                if (districtInput) districtInput.placeholder = "e.g. Lucknow";
+                if (tehsilInput) tehsilInput.placeholder = "e.g. Malihabad";
+                if (villageInput) villageInput.placeholder = "e.g. Malihabad Rural";
+            }
+
+            // Handle dropdown custom input placeholders
+            const distCustomInput = document.getElementById('district-custom-input');
+            const tehsilCustomInput = document.getElementById('tehsil-custom-input');
+            const villageCustomInput = document.getElementById('village-custom-input');
+            
+            if (lang === 'hi') {
+                if (distCustomInput) distCustomInput.placeholder = "जिला निर्दिष्ट करें";
+                if (tehsilCustomInput) tehsilCustomInput.placeholder = "तहसील निर्दिष्ट करें";
+                if (villageCustomInput) villageCustomInput.placeholder = "गाँव निर्दिष्ट करें";
+            } else {
+                if (distCustomInput) distCustomInput.placeholder = "Specify District Manually";
+                if (tehsilCustomInput) tehsilCustomInput.placeholder = "Specify Tehsil Manually";
+                if (villageCustomInput) villageCustomInput.placeholder = "Specify Village Manually";
+            }
+
+            // Update active states of language buttons
+            const btnEn = document.getElementById('lang-btn-en');
+            const btnHi = document.getElementById('lang-btn-hi');
+            if (lang === 'hi') {
+                btnHi.classList.add('bg-cyan-500/20', 'text-cyan-300', 'font-bold');
+                btnEn.classList.remove('bg-cyan-500/20', 'text-cyan-300');
+            } else {
+                btnEn.classList.add('bg-cyan-500/20', 'text-cyan-300', 'font-bold');
+                btnHi.classList.remove('bg-cyan-500/20', 'text-cyan-300');
+            }
+            
+            // If results are open, re-render the comparison table so badges match language
+            if (comparisonResult) {
+                renderComparisonTable();
+            }
+        }
+
+        // 3. API Connection Checker
+        async function checkBackendConnection() {
+            try {
+                const response = await fetch(`${API_URL}/properties`);
+                if (response.ok) {
+                    isBackendAvailable = true;
+                    document.getElementById('connection-badge').className = "flex items-center gap-2 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full text-xs text-emerald-400";
+                    document.getElementById('connection-text').innerText = "API Connected";
+                }
+            } catch (err) {
+                isBackendAvailable = false;
+                document.getElementById('connection-badge').className = "flex items-center gap-2 bg-yellow-950/40 border border-yellow-500/30 px-3 py-1 rounded-full text-xs text-yellow-500";
+                document.getElementById('connection-text').innerText = "Standalone Simulation";
+                console.log("Using standalone client-side simulation.");
+            }
+        }
+
+        // 4. Dropdowns population logic
+        function populateStatesDropdown() {
+            const stateSel = document.getElementById('state-select');
+            statesList.forEach(state => {
+                const opt = document.createElement('option');
+                opt.value = state;
+                opt.innerText = state;
+                stateSel.appendChild(opt);
+            });
+        }
+
+        function setupDropdownListeners() {
+            const stateSel = document.getElementById('state-select');
+            const districtSel = document.getElementById('district-select');
+            const tehsilSel = document.getElementById('tehsil-select');
+            const villageSel = document.getElementById('village-select');
+
+            stateSel.addEventListener('change', () => {
+                districtSel.innerHTML = `<option value="" data-i18n="districtSelect">${i18n[currentLang].districtSelect}</option>`;
+                tehsilSel.innerHTML = `<option value="" data-i18n="tehsilSelect">${i18n[currentLang].tehsilSelect}</option>`;
+                villageSel.innerHTML = `<option value="" data-i18n="villageSelect">${i18n[currentLang].villageSelect}</option>`;
+                
+                districtSel.disabled = true;
+                tehsilSel.disabled = true;
+                villageSel.disabled = true;
+
+                document.getElementById('district-custom-container').classList.add('hidden');
+                document.getElementById('tehsil-custom-container').classList.add('hidden');
+                document.getElementById('village-custom-container').classList.add('hidden');
+
+                const val = stateSel.value;
+                if (val) {
+                    if (districtsList[val]) {
+                        districtsList[val].forEach(dist => {
+                            const opt = document.createElement('option');
+                            opt.value = dist;
+                            opt.innerText = dist;
+                            districtSel.appendChild(opt);
+                        });
+                    }
+                    // Always add "Other District" option
+                    const opt = document.createElement('option');
+                    opt.value = "Other District";
+                    opt.innerText = "Other / Specify Manually";
+                    districtSel.appendChild(opt);
+                    districtSel.disabled = false;
+                }
+            });
+
+            districtSel.addEventListener('change', () => {
+                const val = districtSel.value;
+                const customCont = document.getElementById('district-custom-container');
+                if (val === "Other District") {
+                    customCont.classList.remove('hidden');
+                } else {
+                    customCont.classList.add('hidden');
+                }
+
+                tehsilSel.innerHTML = `<option value="" data-i18n="tehsilSelect">${i18n[currentLang].tehsilSelect}</option>`;
+                villageSel.innerHTML = `<option value="" data-i18n="villageSelect">${i18n[currentLang].villageSelect}</option>`;
+                tehsilSel.disabled = true;
+                villageSel.disabled = true;
+                document.getElementById('tehsil-custom-container').classList.add('hidden');
+                document.getElementById('village-custom-container').classList.add('hidden');
+
+                if (val && tehsilsList[val]) {
+                    tehsilsList[val].forEach(teh => {
+                        const opt = document.createElement('option');
+                        opt.value = teh;
+                        opt.innerText = teh;
+                        tehsilSel.appendChild(opt);
+                    });
+                    tehsilSel.disabled = false;
+                } else if (val) {
+                    // Fallback to enable tehsil selection if list is incomplete or custom
+                    const opt = document.createElement('option');
+                    opt.value = "Other Tehsil";
+                    opt.innerText = "Other / Specify Manually";
+                    tehsilSel.appendChild(opt);
+                    tehsilSel.disabled = false;
+                }
+            });
+
+            tehsilSel.addEventListener('change', () => {
+                const val = tehsilSel.value;
+                const customCont = document.getElementById('tehsil-custom-container');
+                if (val === "Other Tehsil") {
+                    customCont.classList.remove('hidden');
+                } else {
+                    customCont.classList.add('hidden');
+                }
+
+                villageSel.innerHTML = `<option value="" data-i18n="villageSelect">${i18n[currentLang].villageSelect}</option>`;
+                villageSel.disabled = true;
+                document.getElementById('village-custom-container').classList.add('hidden');
+
+                if (val && villagesList[val]) {
+                    villagesList[val].forEach(vil => {
+                        const opt = document.createElement('option');
+                        opt.value = vil;
+                        opt.innerText = vil;
+                        villageSel.appendChild(opt);
+                    });
+                    villageSel.disabled = false;
+                } else if (val) {
+                    // Fallback to enable village selection if list is incomplete
+                    const opt = document.createElement('option');
+                    opt.value = "Other Village";
+                    opt.innerText = "Other / Specify Manually";
+                    villageSel.appendChild(opt);
+                    villageSel.disabled = false;
+                }
+            });
+
+            villageSel.addEventListener('change', () => {
+                const val = villageSel.value;
+                const customCont = document.getElementById('village-custom-container');
+                if (val === "Other Village") {
+                    customCont.classList.remove('hidden');
+                } else {
+                    customCont.classList.add('hidden');
+                }
+            });
+        }
+
+        // 5. Search Property Action
+        async function searchProperty() {
+            document.getElementById('search-error').classList.add('hidden');
+            document.getElementById('gov-record-preview').classList.add('hidden');
+            document.getElementById('ocr-extraction-section').classList.add('hidden');
+            document.getElementById('file-info-panel').classList.add('hidden');
+
+            let khasra = "";
+            let propId = "";
+            let owner = "";
+            let stateVal = "";
+            let districtVal = "";
+            let tehsilVal = "";
+            let villageVal = "";
+
+            if (isManualLocationMode) {
+                khasra = document.getElementById('khasra-input-manual').value.trim();
+                propId = document.getElementById('propid-input-manual').value.trim();
+                owner = document.getElementById('owner-input-manual').value.trim();
+                stateVal = document.getElementById('state-input').value.trim();
+                districtVal = document.getElementById('district-input').value.trim();
+                tehsilVal = document.getElementById('tehsil-input').value.trim();
+                villageVal = document.getElementById('village-input').value.trim();
+            } else {
+                khasra = document.getElementById('khasra-input').value.trim();
+                propId = document.getElementById('propid-input').value.trim();
+                owner = document.getElementById('owner-input').value.trim();
+                stateVal = document.getElementById('state-select').value;
+                
+                const districtSelectVal = document.getElementById('district-select').value;
+                districtVal = districtSelectVal === "Other District" 
+                    ? document.getElementById('district-custom-input').value.trim() 
+                    : districtSelectVal;
+                
+                const tehsilSelectVal = document.getElementById('tehsil-select').value;
+                tehsilVal = tehsilSelectVal === "Other Tehsil" 
+                    ? document.getElementById('tehsil-custom-input').value.trim() 
+                    : tehsilSelectVal;
+                
+                const villageSelectVal = document.getElementById('village-select').value;
+                villageVal = villageSelectVal === "Other Village" 
+                    ? document.getElementById('village-custom-input').value.trim() 
+                    : villageSelectVal;
+            }
+
+            if (!stateVal || !districtVal) {
+                alert("Please select or enter both State and District.");
+                return;
+            }
+
+            if (!khasra && !propId && !owner) {
+                alert("Please fill Khasra Number, Property ID, or Owner Name.");
+                return;
+            }
+
+            // Start Loading Visual
+            document.getElementById('view-wizard').classList.add('hidden');
+            document.getElementById('view-loading').classList.remove('hidden');
+            document.getElementById('loading-status-text').innerText = "Querying Authoritative Database...";
+
+            setTimeout(async () => {
+                let foundProperty = null;
+
+                // Backend path
+                if (isBackendAvailable) {
+                    try {
+                        let query = propId || khasra || owner;
+                        // Replace slash with dash for URLs
+                        let formattedQuery = query.replace("/", "-");
+                        const urlParams = new URLSearchParams({
+                            owner: owner,
+                            state: stateVal,
+                            district: districtVal,
+                            tehsil: tehsilVal,
+                            village: villageVal,
+                            propId: propId
+                        });
+                        const response = await fetch(`${API_URL}/verify/${formattedQuery}?${urlParams.toString()}`);
+                        if (response.ok) {
+                            foundProperty = await response.json();
+                        }
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }
+
+                // Fallback client path
+                if (!foundProperty) {
+                    const searchKey = (propId || khasra || owner).toLowerCase();
+                    for (const pid in clientPropertiesDb) {
+                        const p = clientPropertiesDb[pid];
+                        if (p.id.toLowerCase() === searchKey || p.khasra === searchKey || p.ownerName.toLowerCase().includes(searchKey)) {
+                            foundProperty = p;
+                            break;
+                        }
+                    }
+                }
+
+                // If property is still not found in static lists, dynamically generate it 
+                // using entered search parameters to support verifying custom properties in that locality.
+                if (!foundProperty) {
+                    const finalState = stateVal || "Punjab";
+                    const finalDistrict = districtVal || "Ludhiana";
+                    const finalTehsil = tehsilVal || "Ludhiana West";
+                    const finalVillage = villageVal || "Custom Locality";
+                    const finalKhasra = khasra || "100/1";
+                    const finalPropId = propId || `PROP-${Math.floor(100 + Math.random() * 900)}`;
+                    const finalOwner = owner || "Custom Owner";
+
+                    const resolvedCoords = getLocationCoords(finalState, finalDistrict);
+                    const lat = resolvedCoords[0];
+                    const lng = resolvedCoords[1];
+                    const size = 0.0006;
+                    const dynamicGeom = {
+                        "type": "Polygon",
+                        "coordinates": [
+                            [
+                                [lng - size, lat - size],
+                                [lng + size, lat - size],
+                                [lng + size, lat + size],
+                                [lng - size, lat + size],
+                                [lng - size, lat - size]
+                            ]
+                        ]
+                    };
+
+                    foundProperty = {
+                        "id": finalPropId,
+                        "propertyId": finalPropId,
+                        "ownerName": finalOwner,
+                        "fatherName": "Som Nath",
+                        "khasra": finalKhasra,
+                        "khasraNumber": finalKhasra,
+                        "area": 2.2,
+                        "propertyType": "Residential Plot",
+                        "location": finalVillage,
+                        "state": finalState,
+                        "district": finalDistrict,
+                        "tehsil": finalTehsil,
+                        "village": finalVillage,
+                        "registrationNumber": `REG-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+                        "registrationDate": "2026-01-15",
+                        "status": "Clear",
+                        "mortgage": "None",
+                        "courtCase": "None",
+                        "coordinates": resolvedCoords,
+                        "latitude": lat,
+                        "longitude": lng,
+                        "geometry": dynamicGeom,
+                        "address": `${finalVillage}, ${finalTehsil}, ${finalDistrict}, ${finalState}`
+                    };
+
+                    // Cache in local memory database
+                    clientPropertiesDb[finalPropId] = foundProperty;
+                }
+
+                // Stop Loading Visual
+                document.getElementById('view-loading').classList.add('hidden');
+                document.getElementById('view-wizard').classList.remove('hidden');
+
+                if (foundProperty) {
+                    currentProperty = foundProperty;
+                    // Populate preview card
+                    document.getElementById('prev-owner').innerText = foundProperty.ownerName;
+                    document.getElementById('prev-father').innerText = foundProperty.fatherName;
+                    document.getElementById('prev-khasra').innerText = foundProperty.khasra;
+                    document.getElementById('prev-area').innerText = `${foundProperty.area} Acres`;
+                    document.getElementById('prev-reg-no').innerText = foundProperty.registrationNumber;
+                    document.getElementById('prev-reg-date').innerText = foundProperty.registrationDate;
+                    
+                    const statusText = document.getElementById('prev-status');
+                    statusText.innerText = foundProperty.status;
+                    if (foundProperty.status === 'Clear') {
+                        statusText.className = 'text-emerald-400 font-semibold';
+                    } else {
+                        statusText.className = 'text-red-400 font-semibold';
+                    }
+                    
+                    document.getElementById('prev-address').innerText = foundProperty.address;
+
+                    // Reveal preview panel
+                    document.getElementById('gov-record-preview').classList.remove('hidden');
+                    // Scroll into view
+                    document.getElementById('gov-record-preview').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    document.getElementById('search-error').classList.remove('hidden');
+                }
+            }, 1000);
+        }
+
+        // 6. Drag and Drop File Handlers
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('file-input');
+
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-cyan-400', 'bg-white/[0.04]');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('border-cyan-400', 'bg-white/[0.04]');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-cyan-400', 'bg-white/[0.04]');
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileSelect(e.dataTransfer.files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length) {
+                    handleFileSelect(fileInput.files[0]);
+                }
+            });
+        }
+
+        function simulateFileUpload() {
+            const mockFile = new File(["dummy"], "deed_draft_sih2026.pdf", { type: "application/pdf" });
+            handleFileSelect(mockFile);
+            
+            let width = 0;
+            const prog = document.getElementById('upload-progress-bar');
+            prog.style.width = '0%';
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                } else {
+                    width += 20;
+                    prog.style.width = width + '%';
+                }
+            }, 50);
+        }
+
+        function handleFileSelect(file) {
+            uploadedFile = file;
+            document.getElementById('info-filename').innerText = file.name;
+            
+            // Format size
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            document.getElementById('info-filesize').innerText = `${sizeMB} MB`;
+
+            // Reset progress bar
+            const prog = document.getElementById('upload-progress-bar');
+            prog.style.width = '0%';
+            
+            // Reveal panel
+            document.getElementById('file-info-panel').classList.remove('hidden');
+
+            // Simulate file upload progress micro-animation
+            let w = 0;
+            const interval = setInterval(() => {
+                w += 20;
+                prog.style.width = `${w}%`;
+                if (w >= 100) {
+                    clearInterval(interval);
+                }
+            }, 80);
+
+            // Handle preview if Image
+            const previewBox = document.getElementById('info-preview');
+            const previewImg = document.getElementById('info-img-preview');
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    previewBox.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewBox.classList.add('hidden');
+                previewImg.src = '';
+            }
+        }
+
+        // 7. Document OCR Analysis
+        async function runOcrAnalysis() {
+            const steps = [
+                { en: "Document uploaded successfully", hi: "दस्तावेज़ सफलतापूर्वक अपलोड किया गया" },
+                { en: "Reading document layout and signatures", hi: "दस्तावेज़ लेआउट और हस्ताक्षर पढ़े जा रहे हैं" },
+                { en: "Running AI OCR text extraction", hi: "एआई ओसीआर पाठ निष्कर्षण चल रहा है" },
+                { en: "Identifying property registry fields", hi: "संपत्ति रजिस्ट्री क्षेत्रों की पहचान की जा रही है" },
+                { en: "Cross-referencing database information", hi: "डेटाबेस जानकारी का मिलान किया जा रहा है" },
+                { en: "Analysis complete", hi: "विश्लेषण पूरा हुआ" }
+            ];
+
+            const listContainer = document.getElementById('loading-steps-list');
+            listContainer.innerHTML = '';
+            
+            // Initial render: all pending
+            steps.forEach((step, idx) => {
+                const stepEl = document.createElement('div');
+                stepEl.id = `ocr-step-${idx}`;
+                stepEl.className = "flex items-center gap-3 transition-opacity duration-300 opacity-40";
+                stepEl.innerHTML = `
+                    <div class="step-indicator w-5 h-5 rounded-full border border-gray-600 flex items-center justify-center text-[10px] text-gray-500 font-bold">${idx + 1}</div>
+                    <span class="step-text">${step[currentLang]}</span>
+                `;
+                listContainer.appendChild(stepEl);
+            });
+
+            document.getElementById('view-wizard').classList.add('hidden');
+            document.getElementById('view-loading').classList.remove('hidden');
+
+            const delays = [600, 700, 900, 800, 700, 450];
+            for (let i = 0; i < steps.length; i++) {
+                const stepEl = document.getElementById(`ocr-step-${i}`);
+                stepEl.classList.remove('opacity-40');
+                stepEl.classList.add('opacity-100');
+                
+                const indicator = stepEl.querySelector('.step-indicator');
+                indicator.className = "step-indicator w-5 h-5 rounded-full border border-cyan-500 bg-cyan-950/30 flex items-center justify-center text-[10px] text-cyan-400 font-bold";
+                indicator.innerHTML = `<span class="animate-pulse">●</span>`;
+                
+                document.getElementById('loading-status-text').innerText = steps[i][currentLang];
+                
+                await new Promise(resolve => setTimeout(resolve, delays[i]));
+                
+                indicator.className = "step-indicator w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-[11px] font-bold";
+                indicator.innerHTML = "✓";
+            }
+
+            let ocrData = null;
+
+            if (isBackendAvailable) {
+                try {
+                    const response = await fetch(`${API_URL}/document/analyze`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            propertyId: currentProperty.id,
+                            filename: uploadedFile.name
+                        })
+                    });
+                    if (response.ok) {
+                        const res = await response.json();
+                        ocrData = res.extractedData;
+                    }
+                } catch (err) {
+                    console.error("Backend OCR request failed, falling back to client simulation:", err);
+                }
+            }
+
+            // Fallback client mock OCR data
+            if (!ocrData) {
+                ocrData = getClientOcrData(currentProperty.id);
+            }
+
+            extractedData = ocrData;
+
+            // Populate OCR labels
+            document.getElementById('ocr-owner').innerText = ocrData.ownerName;
+            document.getElementById('ocr-father').innerText = ocrData.fatherName;
+            document.getElementById('ocr-khasra').innerText = ocrData.khasra;
+            document.getElementById('ocr-area').innerText = `${ocrData.area} Acres`;
+            document.getElementById('ocr-reg-no').innerText = ocrData.registrationNumber;
+            document.getElementById('ocr-reg-date').innerText = ocrData.registrationDate;
+            document.getElementById('ocr-address').innerText = ocrData.address;
+
+            // Stop loading and reveal ocr section
+            document.getElementById('view-loading').classList.add('hidden');
+            document.getElementById('view-wizard').classList.remove('hidden');
+            
+            document.getElementById('ocr-extraction-section').classList.remove('hidden');
+            document.getElementById('ocr-extraction-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Simulates custom OCR mapping for offline execution
+        function getClientOcrData(propId) {
+            if (propId === "PROP-001") {
+                return {
+                    "ownerName": "Ramesh Kumar", // mismatch Rajesh
+                    "fatherName": "Ram Lal",
+                    "khasra": "123/4",
+                    "area": 2.8, // mismatch 2.5
+                    "registrationNumber": "REG-2025-0192",
+                    "registrationDate": "2025-06-12",
+                    "address": "Malihabad Rural, Malihabad, Lucknow, Uttar Pradesh"
+                };
+            } else if (propId === "PROP-002") {
+                return {
+                    "ownerName": "Amit Sharma",
+                    "fatherName": "Som Nath",
+                    "khasra": "123/5",
+                    "area": 1.8, // exact match
+                    "registrationNumber": "REG-2025-0456",
+                    "registrationDate": "2025-08-20",
+                    "address": "Malihabad Rural, Malihabad, Lucknow, Uttar Pradesh"
+                };
+            } else if (propId === "PROP-003") {
+                return {
+                    "ownerName": "Sunita Sen", // owner mismatch + active mortgage + pending litigation = HIGH RISK
+                    "fatherName": "Jagdish Prasad",
+                    "khasra": "123/6",
+                    "area": 3.2,
+                    "registrationNumber": "REG-2025-0789",
+                    "registrationDate": "2025-04-15",
+                    "address": "Malihabad Rural, Malihabad, Lucknow, Uttar Pradesh"
+                };
+            } else if (propId === "PROP-004") {
+                return {
+                    "ownerName": "Mohan Singh",
+                    "fatherName": "Gurnam Singh",
+                    "khasra": "124/1",
+                    "area": 1.2,
+                    "registrationNumber": "REG-2025-0222",
+                    "registrationDate": "2025-03-10",
+                    "address": "Malihabad Rural, Malihabad, Lucknow, Uttar Pradesh"
+                };
+            } else if (propId === "PROP-005") {
+                return {
+                    "ownerName": "Priya Gupta",
+                    "fatherName": "Ramesh Gupta",
+                    "khasra": "124/3", // Khasra mismatch
+                    "area": 4.3, // partial area match (4.3 vs 4.1) = MEDIUM RISK
+                    "registrationNumber": "REG-2025-0555",
+                    "registrationDate": "2025-07-05",
+                    "address": "Malihabad Rural, Malihabad, Lucknow, Uttar Pradesh"
+                };
+            }
+            // Fallback for custom simulated properties - dynamically matching searched location case-insensitively
+            let currentProp = null;
+            if (propId) {
+                for (const key in clientPropertiesDb) {
+                    if (key.toLowerCase() === propId.toLowerCase()) {
+                        currentProp = clientPropertiesDb[key];
+                        break;
+                    }
+                }
+            }
+            
+            const prop = currentProp || currentProperty;
+            if (prop) {
+                return {
+                    "ownerName": prop.ownerName === "Custom Owner" || prop.ownerName === "Simulated Owner" ? "Ramesh Kumar" : prop.ownerName,
+                    "fatherName": prop.fatherName,
+                    "khasra": prop.khasra,
+                    "area": prop.area + 0.6, // Slight mismatch
+                    "registrationNumber": prop.registrationNumber,
+                    "registrationDate": prop.registrationDate,
+                    "address": prop.address
+                };
+            }
+            return {
+                "ownerName": "Ramesh Kumar",
+                "fatherName": "Ram Lal",
+                "khasra": "123/4",
+                "area": 2.8,
+                "registrationNumber": "REG-2025-0192",
+                "registrationDate": "2025-06-12",
+                "address": "Village Gill, Ludhiana East, Ludhiana, Punjab"
+            };
+        }
+
+        // 8. Execute Verification Comparisons & Score Calculation
+        async function executeVerification() {
+            document.getElementById('view-wizard').classList.add('hidden');
+            document.getElementById('view-loading').classList.remove('hidden');
+            document.getElementById('loading-status-text').innerText = "Comparing Databases & Running Risk Calculations...";
+
+            setTimeout(async () => {
+                let verificationResult = null;
+
+                if (isBackendAvailable) {
+                    try {
+                        const response = await fetch(`${API_URL}/verify`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                govt: currentProperty,
+                                doc: extractedData
+                            })
+                        });
+                        if (response.ok) {
+                            verificationResult = await response.json();
+                        }
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }
+
+                // Fallback client comparison calculation
+                if (!verificationResult) {
+                    verificationResult = runClientVerification(currentProperty, extractedData);
+                }
+
+                comparisonResult = verificationResult;
+                currentScore = verificationResult.score;
+                currentRisk = verificationResult.risk;
+
+                // Render Results
+                renderResultsDashboard();
+                saveToHistory(currentProperty.id, currentProperty.ownerName, currentScore, currentRisk);
+
+                document.getElementById('view-loading').classList.add('hidden');
+                navigateTo('results');
+            }, 1500);
+        }
+
+        function runClientVerification(govt, doc) {
+            // Precise score logic mirroring backend
+            let ownerScore = 0;
+            let ownerStatus = "mismatch";
+            let govtOwner = String(govt.ownerName).trim().toLowerCase();
+            let docOwner = String(doc.ownerName).trim().toLowerCase();
+
+            if (govtOwner === docOwner) {
+                ownerScore = 25;
+                ownerStatus = "match";
+            } else {
+                let govtWords = govtOwner.split(/\s+/);
+                let docWords = docOwner.split(/\s+/);
+                const stopwords = ["kumar", "singh", "devi", "lal", "ram", "prasad", "sen", "sharma", "gupta"];
+                let intersection = govtWords.filter(w => docWords.includes(w) && !stopwords.includes(w));
+                if (intersection.length > 0) {
+                    ownerScore = 20;
+                    ownerStatus = "partial";
+                } else {
+                    ownerScore = 0;
+                    ownerStatus = "mismatch";
+                }
+            }
+
+            let khasraScore = 0;
+            let khasraStatus = "mismatch";
+            if (String(govt.khasra).trim() === String(doc.khasra).trim()) {
+                khasraScore = 20;
+                khasraStatus = "match";
+            } else {
+                khasraScore = 0;
+                khasraStatus = "mismatch";
+            }
+
+            let areaScore = 0;
+            let areaStatus = "mismatch";
+            try {
+                let govtArea = parseFloat(govt.area);
+                let docArea = parseFloat(doc.area);
+                if (govtArea === docArea) {
+                    areaScore = 15;
+                    areaStatus = "match";
+                } else {
+                    let diffPct = Math.abs(govtArea - docArea) / govtArea;
+                    if (diffPct <= 0.10) {
+                        areaScore = 7;
+                        areaStatus = "partial";
+                    } else {
+                        areaScore = 0;
+                        areaStatus = "mismatch";
+                    }
+                }
+            } catch (e) {
+                areaScore = 0;
+                areaStatus = "mismatch";
+            }
+
+            let regScore = 0;
+            let regStatus = "mismatch";
+            if (String(govt.registrationNumber).trim() === String(doc.registrationNumber).trim()) {
+                regScore = 15;
+                regStatus = "match";
+            } else {
+                regScore = 0;
+                regStatus = "mismatch";
+            }
+
+            let encScore = 0;
+            let encStatus = "active";
+            if (!govt.mortgage || govt.mortgage === "None" || govt.mortgage === "") {
+                encScore = 10;
+                encStatus = "clear";
+            } else {
+                encScore = 0;
+                encStatus = "active";
+            }
+
+            let courtScore = 0;
+            let courtStatus = "clear";
+            if (!govt.courtCase || govt.courtCase === "None" || govt.courtCase === "") {
+                courtScore = 10;
+                courtStatus = "clear";
+            } else {
+                courtScore = 0;
+                courtStatus = "pending";
+            }
+
+            // 7. GIS Verification Check (5 pts)
+            let gisScore = 0;
+            let gisStatus = "mismatch";
+
+            const hasLatLon = !!(govt.latitude && govt.longitude);
+            const hasGeom = !!(govt.geometry && govt.geometry.type === 'Polygon');
+            const khasraMatchVal = String(govt.khasra).trim() === String(doc.khasra).trim();
+
+            const govtState = String(govt.state || "").trim().toLowerCase();
+            const docAddress = String(doc.address || "").trim().toLowerCase();
+            const locConsistent = !!(govtState && docAddress.includes(govtState));
+
+            let areaConsistent = false;
+            if (hasGeom) {
+                const gisArea = calculateParcelArea(govt.geometry);
+                const govtAreaVal = parseFloat(govt.area);
+                if (govtAreaVal > 0) {
+                    const diffPct = Math.abs(gisArea - govtAreaVal) / govtAreaVal;
+                    if (diffPct <= 0.05) {
+                        areaConsistent = true;
+                    }
+                }
+            }
+
+            if (hasLatLon) gisScore += 1;
+            if (hasGeom) gisScore += 1;
+            if (khasraMatchVal) gisScore += 1;
+            if (locConsistent) gisScore += 1;
+            if (areaConsistent) gisScore += 1;
+
+            if (gisScore === 5) {
+                gisStatus = "clear";
+            } else if (gisScore >= 3) {
+                gisStatus = "partial";
+            } else {
+                gisStatus = "mismatch";
+            }
+
+            const totalScore = ownerScore + khasraScore + areaScore + regScore + encScore + courtScore + gisScore;
+            
+            let risk = "LOW";
+            if (totalScore >= 80) risk = "LOW";
+            else if (totalScore >= 60) risk = "MEDIUM";
+            else risk = "HIGH";
+
+            return {
+                score: totalScore,
+                risk: risk,
+                breakdown: {
+                    owner: { score: ownerScore, max: 25, status: ownerStatus },
+                    khasra: { score: khasraScore, max: 20, status: khasraStatus },
+                    area: { score: areaScore, max: 15, status: areaStatus },
+                    registration: { score: regScore, max: 15, status: regStatus },
+                    encumbrance: { score: encScore, max: 10, status: encStatus },
+                    court: { score: courtScore, max: 10, status: courtStatus },
+                    gis: { score: gisScore, max: 5, status: gisStatus }
+                }
+            };
+        }
+
+        // 9. Render Results Dashboard Elements
+        function renderResultsDashboard() {
+            // Set Score Badge and Color System
+            const displayScore = document.getElementById('display-score');
+            const riskBadge = document.getElementById('risk-badge');
+            const alertHeader = document.getElementById('status-alert-header');
+            const alertBgGlow = document.getElementById('alert-bg-glow');
+            const alertTitle = document.getElementById('alert-title');
+            const alertDesc = document.getElementById('alert-desc');
+
+            displayScore.innerText = `${currentScore}%`;
+            
+            let badgeText = "";
+            if (currentRisk === "LOW") {
+                badgeText = i18n[currentLang].lowRisk;
+                riskBadge.className = "mt-2 inline-block text-[10px] px-2 py-0.5 rounded font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                alertHeader.className = "glass-panel p-6 rounded-2xl mb-8 flex flex-col md:flex-row justify-between items-center border-l-4 border-l-emerald-500 relative overflow-hidden";
+                alertBgGlow.className = "absolute right-0 top-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[60px] -z-10";
+                
+                alertTitle.innerText = "System Audit: Verification Complete";
+                alertDesc.innerText = "The property records match exactly with zero liabilities detected.";
+                alertDesc.className = "text-emerald-400 font-semibold mt-1";
+                displayScore.className = "text-4xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]";
+            } else if (currentRisk === "MEDIUM") {
+                badgeText = i18n[currentLang].mediumRisk;
+                riskBadge.className = "mt-2 inline-block text-[10px] px-2 py-0.5 rounded font-black bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
+                alertHeader.className = "glass-panel p-6 rounded-2xl mb-8 flex flex-col md:flex-row justify-between items-center border-l-4 border-l-yellow-500 relative overflow-hidden";
+                alertBgGlow.className = "absolute right-0 top-0 w-64 h-64 bg-yellow-500/10 rounded-full blur-[60px] -z-10";
+
+                alertTitle.innerText = "System Alert: Discrepancies Found";
+                alertDesc.innerText = "Minor discrepancies or active mortgages have been flagged on this property.";
+                alertDesc.className = "text-yellow-400 font-semibold mt-1";
+                displayScore.className = "text-4xl font-black text-yellow-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)]";
+            } else {
+                badgeText = i18n[currentLang].highRisk;
+                riskBadge.className = "mt-2 inline-block text-[10px] px-2 py-0.5 rounded font-black bg-red-500/20 text-red-400 border border-red-500/30";
+                alertHeader.className = "glass-panel p-6 rounded-2xl mb-8 flex flex-col md:flex-row justify-between items-center border-l-4 border-l-red-500 relative overflow-hidden";
+                alertBgGlow.className = "absolute right-0 top-0 w-64 h-64 bg-red-500/10 rounded-full blur-[60px] -z-10";
+
+                alertTitle.innerText = "Critical Warning: High Risk Detected";
+                alertDesc.innerText = "Major ownership mismatch or pending court dispute found on this property.";
+                alertDesc.className = "text-red-400 font-semibold mt-1";
+                displayScore.className = "text-4xl font-black text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]";
+            }
+            riskBadge.innerText = badgeText;
+
+            // Render details
+            renderComparisonTable();
+            renderLiabilities();
+            renderRiskExplanation();
+
+            // Populate GIS Details
+            document.getElementById('gis-prev-khasra').innerText = currentProperty.khasra;
+            document.getElementById('gis-prev-owner').innerText = currentProperty.ownerName;
+
+            const gisArea = currentProperty.geometry ? calculateParcelArea(currentProperty.geometry) : currentProperty.area;
+            document.getElementById('gis-prev-area').innerText = `${currentProperty.area.toFixed(2)} Acres vs ${gisArea.toFixed(2)} Acres`;
+
+            const diffVal = Math.abs(gisArea - currentProperty.area);
+            const diffPct = currentProperty.area > 0 ? (diffVal / currentProperty.area) : 0;
+            const discrepancyBox = document.getElementById('gis-area-discrepancy-box');
+            if (diffPct > 0.05) {
+                discrepancyBox.classList.remove('hidden');
+                document.getElementById('gis-prev-status').innerHTML = `<span class="text-rose-400">⚠ Discrepancy Found</span>`;
+            } else {
+                discrepancyBox.classList.add('hidden');
+                document.getElementById('gis-prev-status').innerHTML = `<span class="text-emerald-400">✓ Parcel Located</span>`;
+            }
+
+            const fallbackNotice = document.getElementById('gis-fallback-notice');
+            const dataBadge = document.getElementById('gis-data-badge');
+            dataBadge.innerText = currentProperty.sourceType || "DEMO_DATA";
+            if (currentProperty.sourceType === 'OFFICIAL_API') {
+                dataBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-950/40 text-emerald-400 border border-emerald-500/30";
+                document.getElementById('gis-prev-source').innerText = "Official Government Cadastral Data";
+                fallbackNotice.classList.add('hidden');
+            } else {
+                dataBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-950/40 text-amber-400 border border-amber-500/30";
+                document.getElementById('gis-prev-source').innerText = "SETU Demonstration Cadastral Dataset";
+                fallbackNotice.classList.remove('hidden');
+            }
+        }
+
+        function getStatusIcon(status) {
+            if (status === 'match') {
+                return `<span class="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full text-xs font-semibold">✓ ${i18n[currentLang].match}</span>`;
+            } else if (status === 'partial') {
+                return `<span class="inline-flex items-center gap-1 bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded-full text-xs font-semibold">⚠ ${i18n[currentLang].partialMatch}</span>`;
+            } else {
+                return `<span class="inline-flex items-center gap-1 bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full text-xs font-semibold">✕ ${i18n[currentLang].mismatch}</span>`;
+            }
+        }
+
+        function renderRiskExplanation() {
+            const panel = document.getElementById('risk-explanation-panel');
+            panel.classList.remove('hidden');
+
+            let titleText = "";
+            let subtitleText = "";
+            let borderClass = "";
+            let issuesList = [];
+            let recommendationText = "";
+
+            const b = comparisonResult.breakdown;
+
+            if (b.owner.status === 'mismatch') {
+                issuesList.push({
+                    en: `✕ Ownership Name Mismatch: Government record lists <strong>"${currentProperty.ownerName}"</strong> but document lists <strong>"${extractedData.ownerName}"</strong>.`,
+                    hi: `✕ मालिकाना हक का नाम मेल नहीं खाता: सरकारी रिकॉर्ड में <strong>"${currentProperty.ownerName}"</strong> है परंतु दस्तावेज़ में <strong>"${extractedData.ownerName}"</strong> है।`
+                });
+            } else if (b.owner.status === 'partial') {
+                issuesList.push({
+                    en: `⚠ Partial Ownership Match: Overlapping surname/titles (Government: <strong>"${currentProperty.ownerName}"</strong>, Document: <strong>"${extractedData.ownerName}"</strong>).`,
+                    hi: `⚠ आंशिक स्वामित्व मिलान: उपनाम/शीर्षक ओवरलैप दिखाता है (सरकार: <strong>"${currentProperty.ownerName}"</strong>, दस्तावेज़: <strong>"${extractedData.ownerName}"</strong>)।`
+                });
+            }
+
+            if (b.khasra.status === 'mismatch') {
+                issuesList.push({
+                    en: `✕ Khasra / Survey Number Mismatch: Government record shows Khasra <strong>"${currentProperty.khasra}"</strong> but uploaded deed has <strong>"${extractedData.khasra}"</strong>.`,
+                    hi: `✕ खसरा / सर्वेक्षण संख्या मेल नहीं खाता: सरकारी रिकॉर्ड में खसरा संख्या <strong>"${currentProperty.khasra}"</strong> है परंतु विलेख में <strong>"${extractedData.khasra}"</strong> है।`
+                });
+            }
+
+            if (b.area.status === 'mismatch') {
+                issuesList.push({
+                    en: `✕ Land Area Discrepancy: Government registry shows <strong>"${currentProperty.area} Acres"</strong> but deed states <strong>"${extractedData.area} Acres"</strong>.`,
+                    hi: `✕ भूमि क्षेत्रफल विसंगति: सरकारी रजिस्ट्री में <strong>"${currentProperty.area} एकड़"</strong> है परंतु बिक्री विलेख में <strong>"${extractedData.area} एकड़"</strong> है।`
+                });
+            } else if (b.area.status === 'partial') {
+                issuesList.push({
+                    en: `⚠ Minor Area Mismatch: Small variance of area (Registry: <strong>"${currentProperty.area} Acres"</strong>, Document: <strong>"${extractedData.area} Acres"</strong>).`,
+                    hi: `⚠ मामूली क्षेत्रफल विसंगति: अल्प भिन्नता पाई गई (रजिस्ट्री: <strong>"${currentProperty.area} एकड़"</strong>, दस्तावेज़: <strong>"${extractedData.area} एकड़"</strong>)।`
+                });
+            }
+
+            if (b.registration.status === 'mismatch') {
+                issuesList.push({
+                    en: `✕ Registration Number Mismatch: Registry database has number <strong>"${currentProperty.registrationNumber}"</strong> but document states <strong>"${extractedData.registrationNumber}"</strong>.`,
+                    hi: `✕ पंजीकरण संख्या विसंगति: रजिस्ट्री डेटाबेस में संख्या <strong>"${currentProperty.registrationNumber}"</strong> है परंतु दस्तावेज़ में <strong>"${extractedData.registrationNumber}"</strong> है।`
+                });
+            }
+
+            if (b.encumbrance.status === 'active') {
+                issuesList.push({
+                    en: `⚠ Active Collateral Lien: The property is currently mortgaged to <strong>"${currentProperty.mortgage}"</strong> for a sum of <strong>₹${currentProperty.mortgageAmount}</strong>.`,
+                    hi: `⚠ सक्रिय वित्तीय ऋणभार: संपत्ति वर्तमान में <strong>"${currentProperty.mortgage}"</strong> के पास <strong>₹${currentProperty.mortgageAmount}</strong> राशि के लिए बंधक है।`
+                });
+            }
+
+            if (b.court.status === 'pending') {
+                issuesList.push({
+                    en: `⚠ Pending Court Litigation / Stay Order: Active dispute <strong>"${currentProperty.courtCase.caseId}"</strong> is pending in <strong>"${currentProperty.courtCase.court}"</strong> (Issue: <em>"${currentProperty.courtCase.issue}"</em>).`,
+                    hi: `⚠ लंबित न्यायालयीन विवाद / स्थगन आदेश: सक्रिय विवाद <strong>"${currentProperty.courtCase.caseId}"</strong> न्यायालय <strong>"${currentProperty.courtCase.court}"</strong> में लंबित है (विषय: <em>"${currentProperty.courtCase.issue}"</em>)।`
+                });
+            }
+
+            if (currentRisk === "LOW") {
+                borderClass = "border-l-emerald-500 bg-emerald-500/5 text-emerald-300";
+                titleText = currentLang === 'hi' ? "✓ सुरक्षा ऑडिट सफल" : "✓ Security Clearance Passed";
+                subtitleText = currentLang === 'hi' ? "सभी ६ सत्यापन जाँच सफलतापूर्वक पूरी हो गई हैं।" : "All 6 verification checks have passed successfully.";
+                recommendationText = currentLang === 'hi' ? 
+                    "यह संपत्ति चिह्नित जोखिमों से मुक्त है। मानक रजिस्ट्री प्रक्रियाओं का पालन किया जा सकता है।" : 
+                    "The property is clear of flagged risks. Standard registry procedures can be followed.";
+            } else if (currentRisk === "MEDIUM") {
+                borderClass = "border-l-yellow-500 bg-yellow-500/5 text-yellow-300";
+                titleText = currentLang === 'hi' ? "⚠ चेतावनी: मध्यम जोखिम विसंगतियां" : "⚠ Security Warning: Medium Risk Discrepancies";
+                subtitleText = currentLang === 'hi' ? `${issuesList.length} विसंगति/ऋणभार विवरण पाए गए हैं।` : `${issuesList.length} warning/liability flags have been detected.`;
+                recommendationText = currentLang === 'hi' ? 
+                    "सावधानी बरतने की सलाह दी जाती है। सक्रिय वित्तीय बंधकों और मामूली विसंगतियों के संबंध में स्पष्टीकरण मांगा जाना चाहिए।" : 
+                    "Caution is advised. Clarification should be sought regarding the flagged active mortgages and minor discrepancies.";
+            } else {
+                borderClass = "border-l-red-500 bg-red-500/5 text-red-300";
+                titleText = currentLang === 'hi' ? "✕ गंभीर चेतावनी: उच्च जोखिम" : "✕ Critical Warning: High Risk Detected";
+                subtitleText = currentLang === 'hi' ? `${issuesList.length} गंभीर विसंगतियां पाई गई हैं।` : `${issuesList.length} critical issues have been detected.`;
+                recommendationText = currentLang === 'hi' ? 
+                    "लेनदेन के साथ आगे बढ़ने से पहले आगे के कानूनी और दस्तावेज़ सत्यापन की अत्यधिक सिफारिश की जाती है। बेमेल क्षेत्रों और सक्रिय देनदारियों को स्पष्ट किए बिना आगे न बढ़ें।" : 
+                    "Further legal and document verification is recommended before proceeding with the transaction. Do not proceed without clarifying mismatched fields and active liabilities.";
+            }
+
+            let issuesHTML = "";
+            if (issuesList.length > 0) {
+                issuesHTML = `<ul class="space-y-2 list-none pl-0 mb-0">`;
+                issuesList.forEach(issue => {
+                    issuesHTML += `<li class="text-sm border-b border-white/5 pb-2 last:border-0">${issue[currentLang]}</li>`;
+                });
+                issuesHTML += `</ul>`;
+            } else {
+                issuesHTML = `<p class="text-sm text-emerald-400 font-semibold mb-0">✓ ${currentLang === 'hi' ? "स्वामित्व, खसरा, क्षेत्रफल, पंजीकरण संख्या, ऋणभार और अदालती मामलों के सभी ऑडिट मिलान सही हैं।" : "All audits for owner name, khasra, area, registration number, mortgages, and litigations are matching."}</p>`;
+            }
+
+            panel.className = `mb-8 glass-panel p-6 rounded-2xl border-l-4 ${borderClass} animate-fade-in`;
+            panel.innerHTML = `
+                <h4 class="font-bold text-lg text-white mb-1">${titleText}</h4>
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-4">${subtitleText}</p>
+                <div class="mb-4 text-gray-200">
+                    ${issuesHTML}
+                </div>
+                <div class="pt-4 border-t border-white/10 mt-4 text-xs">
+                    <strong class="text-white uppercase tracking-wider">${currentLang === 'hi' ? "सिफारिश" : "RECOMMENDATION"}:</strong> 
+                    <span class="text-gray-300 font-medium">${recommendationText}</span>
+                </div>
+            `;
+        }
+
+        function renderComparisonTable() {
+            const tbody = document.getElementById('comparison-rows');
+            tbody.innerHTML = '';
+
+            const fields = [
+                { label: i18n[currentLang].ownerName, govt: currentProperty.ownerName, doc: extractedData.ownerName, status: comparisonResult.breakdown.owner.status },
+                { label: i18n[currentLang].fatherName, govt: currentProperty.fatherName, doc: extractedData.fatherName, status: currentProperty.fatherName === extractedData.fatherName ? 'match' : 'mismatch' },
+                { label: i18n[currentLang].formKhasra, govt: currentProperty.khasra, doc: extractedData.khasra, status: comparisonResult.breakdown.khasra.status },
+                { label: i18n[currentLang].area, govt: `${currentProperty.area} Acres`, doc: `${extractedData.area} Acres`, status: comparisonResult.breakdown.area.status },
+                { label: i18n[currentLang].registrationNo, govt: currentProperty.registrationNumber, doc: extractedData.registrationNumber, status: comparisonResult.breakdown.registration.status }
+            ];
+
+            fields.forEach(f => {
+                const tr = document.createElement('tr');
+                const isMismatch = f.status === 'mismatch';
+                const isPartial = f.status === 'partial';
+                
+                let highlightClass = "";
+                if (isMismatch) {
+                    highlightClass = "bg-red-500/10 border-l-2 border-l-red-500";
+                } else if (isPartial) {
+                    highlightClass = "bg-yellow-500/10 border-l-2 border-l-yellow-500";
+                } else {
+                    highlightClass = "hover:bg-white/[0.01]";
+                }
+                
+                tr.className = `border-b border-white/5 py-3 transition ${highlightClass}`;
+                
+                let explanationText = "";
+                if (isMismatch) {
+                    explanationText = `<div class="text-[10px] text-red-400 mt-1 font-semibold uppercase tracking-wider">✕ ${currentLang === 'hi' ? "विसंगति पाई गई" : "MISMATCH DETECTED"}</div>`;
+                } else if (isPartial) {
+                    explanationText = `<div class="text-[10px] text-yellow-400 mt-1 font-semibold uppercase tracking-wider">⚠ ${currentLang === 'hi' ? "आंशिक मिलान" : "PARTIAL MATCH DETECTED"}</div>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-white">
+                        <div>${f.label}</div>
+                        ${explanationText}
+                    </td>
+                    <td class="p-3 ${isMismatch ? 'text-red-300 font-bold' : isPartial ? 'text-yellow-300' : 'text-gray-300'}">${f.govt}</td>
+                    <td class="p-3 ${isMismatch ? 'text-red-300 font-bold' : isPartial ? 'text-yellow-300' : 'text-gray-300'}">${f.doc}</td>
+                    <td class="p-3 text-center">${getStatusIcon(f.status)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderLiabilities() {
+            // Encumbrance details
+            const encBadge = document.getElementById('encumbrance-status-badge');
+            const encDetails = document.getElementById('encumbrance-details');
+            const hasMortgage = currentProperty.mortgage !== "None" && currentProperty.mortgage !== "";
+
+            if (hasMortgage) {
+                encBadge.innerText = i18n[currentLang].activeMortgage;
+                encBadge.className = "px-3 py-1 rounded text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 uppercase";
+                encDetails.innerHTML = `
+                    <p><strong>Bank:</strong> ${currentProperty.mortgage}</p>
+                    <p><strong>Type:</strong> Mortgage Loan</p>
+                    <p><strong>Amount:</strong> ₹${currentProperty.mortgageAmount}</p>
+                    <p><strong>Date:</strong> ${currentProperty.mortgageDate}</p>
+                `;
+            } else {
+                encBadge.innerText = i18n[currentLang].clearMortgage;
+                encBadge.className = "px-3 py-1 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase";
+                encDetails.innerHTML = `<p class="text-xs text-gray-400">No active financial encumbrances or collateral liens found on this title deed in registry logs.</p>`;
+            }
+
+            // Litigation details
+            const litBadge = document.getElementById('litigation-status-badge');
+            const litDetails = document.getElementById('litigation-details');
+            const hasCourtCase = typeof currentProperty.courtCase === 'object';
+
+            if (hasCourtCase) {
+                const c = currentProperty.courtCase;
+                litBadge.innerText = i18n[currentLang].activeLitigation;
+                litBadge.className = "px-3 py-1 rounded text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 uppercase";
+                litDetails.innerHTML = `
+                    <p><strong>Case ID:</strong> ${c.caseId}</p>
+                    <p><strong>Court:</strong> ${c.court}</p>
+                    <p><strong>Status:</strong> ${c.status}</p>
+                    <p><strong>Issue:</strong> ${c.issue}</p>
+                `;
+            } else {
+                litBadge.innerText = i18n[currentLang].clearLitigation;
+                litBadge.className = "px-3 py-1 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase";
+                litDetails.innerHTML = `<p class="text-xs text-gray-400">No pending litigation records or stay orders found in district civil court registries.</p>`;
+            }
+        }
+
+        // 10. Geospatial Leaflet Map Plotting
+        // Map Selection Handler from click
+        function selectPropertyFromMap(propId) {
+            const prop = clientPropertiesDb[propId];
+            if (!prop) return;
+            
+            // Update currentProperty
+            currentProperty = prop;
+            
+            // Pre-fill search inputs
+            document.getElementById('state-select').value = prop.state;
+            populateDistrictsDropdown();
+            document.getElementById('district-select').value = prop.district;
+            populateTehsilsDropdown();
+            document.getElementById('tehsil-select').value = prop.tehsil;
+            populateVillagesDropdown();
+            document.getElementById('village-select').value = prop.village;
+            
+            document.getElementById('khasra-input').value = prop.khasra;
+            document.getElementById('propid-input').value = prop.id;
+            document.getElementById('owner-input').value = prop.ownerName;
+            
+            // Clear previous verification states
+            uploadedFile = null;
+            extractedData = null;
+            comparisonResult = null;
+            
+            // Hide results panel if showing, go to wizard search preview
+            document.getElementById('ocr-extraction-section').classList.add('hidden');
+            document.getElementById('file-info-panel').classList.add('hidden');
+            document.getElementById('gov-record-preview').classList.remove('hidden');
+            
+            // Set preview values
+            document.getElementById('prev-id').innerText = prop.id;
+            document.getElementById('prev-owner').innerText = prop.ownerName;
+            document.getElementById('prev-father').innerText = prop.fatherName;
+            document.getElementById('prev-khasra').innerText = prop.khasra;
+            document.getElementById('prev-area').innerText = `${prop.area} Acres`;
+            document.getElementById('prev-type').innerText = prop.propertyType;
+            document.getElementById('prev-address').innerText = prop.address;
+            
+            // Close Leaflet popup cleanly
+            if (myMap) {
+                myMap.closePopup();
+            }
+
+            // Navigate to wizard view
+            navigateTo('wizard');
+            setTimeout(() => {
+                document.getElementById('gov-record-preview').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        // 10. Geospatial Leaflet Map Plotting
+        function initializeMap() {
+            if (!currentProperty) return;
+            const coords = currentProperty.coordinates;
+
+            if (myMap) {
+                myMap.remove();
+            }
+
+            myMap = L.map('map', { zoomControl: false }).setView(coords, 16);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap & CartoDB'
+            }).addTo(myMap);
+
+            L.control.zoom({ position: 'bottomright' }).addTo(myMap);
+
+            // 1. Draw Selected Property Polygon
+            let selectedPoly = null;
+            if (currentProperty.geometry) {
+                // Convert GeoJSON coords [lng, lat] to Leaflet [lat, lng]
+                const leafletCoords = currentProperty.geometry.coordinates[0].map(pt => [pt[1], pt[0]]);
+                selectedPoly = L.polygon(leafletCoords, {
+                    color: currentRisk === 'LOW' ? '#10b981' : currentRisk === 'MEDIUM' ? '#f59e0b' : '#ef4444',
+                    fillColor: currentRisk === 'LOW' ? '#10b981' : currentRisk === 'MEDIUM' ? '#f59e0b' : '#ef4444',
+                    fillOpacity: 0.25,
+                    weight: 3
+                }).addTo(myMap);
+            } else {
+                // Fallback simulated polygon around coordinates
+                const lat = coords[0];
+                const lng = coords[1];
+                const size = 0.0006;
+                const boundaryPoints = [
+                    [lat + size, lng - size],
+                    [lat + size, lng + size],
+                    [lat - size, lng + size],
+                    [lat - size, lng - size]
+                ];
+                selectedPoly = L.polygon(boundaryPoints, {
+                    color: currentRisk === 'LOW' ? '#10b981' : currentRisk === 'MEDIUM' ? '#f59e0b' : '#ef4444',
+                    fillColor: currentRisk === 'LOW' ? '#10b981' : currentRisk === 'MEDIUM' ? '#f59e0b' : '#ef4444',
+                    fillOpacity: 0.25,
+                    weight: 3
+                }).addTo(myMap);
+            }
+
+            // Fit map bounds to selected parcel
+            if (selectedPoly) {
+                myMap.fitBounds(selectedPoly.getBounds(), { padding: [30, 30] });
+            }
+
+            // Selected popup content
+            const selectedPopupHtml = `
+                <div style="background:#0f172a; color:white; padding:8px; border-radius:8px; font-family:'Outfit',sans-serif; font-size:12px; min-width: 140px;">
+                    <b style="color:#22d3ee; font-size:13px;">Khasra ${currentProperty.khasra} (Selected)</b><br>
+                    <span><b>Owner:</b> ${currentProperty.ownerName}</span><br>
+                    <span><b>Area:</b> ${currentProperty.area} Acres</span><br>
+                    <span><b>Verification:</b> ${currentRisk} RISK (${currentScore}%)</span>
+                </div>
+            `;
+            selectedPoly.bindPopup(selectedPopupHtml);
+            
+            // Open selected popup with marker
+            const marker = L.marker(coords).addTo(myMap).bindPopup(selectedPopupHtml);
+            marker.openPopup();
+
+            // 2. Draw Neighboring Parcels
+            const neighbours = SETUServices.cadastralService.getNeighbours(currentProperty);
+            neighbours.forEach(neigh => {
+                if (neigh.geometry) {
+                    const leafletCoords = neigh.geometry.coordinates[0].map(pt => [pt[1], pt[0]]);
+                    const neighPoly = L.polygon(leafletCoords, {
+                        color: '#38bdf8',
+                        fillColor: '#38bdf8',
+                        fillOpacity: 0.08,
+                        weight: 1.5,
+                        dashArray: '4, 4'
+                    }).addTo(myMap);
+
+                    // Neighbor popup with "Verify Property" button
+                    const neighPopupHtml = `
+                        <div style="background:#0f172a; color:white; padding:8px; border-radius:8px; font-family:'Outfit',sans-serif; font-size:12px; min-width: 145px;">
+                            <b style="color:#38bdf8; font-size:13px;">Khasra ${neigh.khasra}</b><br>
+                            <span><b>Owner:</b> ${neigh.ownerName}</span><br>
+                            <span><b>Area:</b> ${neigh.area} Acres</span><br>
+                            <span><b>ID:</b> ${neigh.id}</span><br>
+                            <button onclick="selectPropertyFromMap('${neigh.id}')" style="margin-top:8px; background:#0284c7; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; width:100%; text-align:center;">Verify Property</button>
+                        </div>
+                    `;
+                    neighPoly.bindPopup(neighPopupHtml);
+
+                    // Add hover effect
+                    neighPoly.on('mouseover', function () {
+                        neighPoly.setStyle({ fillOpacity: 0.2, weight: 2 });
+                    });
+                    neighPoly.on('mouseout', function () {
+                        neighPoly.setStyle({ fillOpacity: 0.08, weight: 1.5 });
+                    });
+                }
+            });
+        }
+
+        // 11. Report Generation Template (Printable HTML in new tab)
+        function generateReport() {
+            if (!currentProperty || !extractedData) return;
+
+            const reportWindow = window.open("", "_blank");
+            
+            const gisStatus = comparisonResult.breakdown.gis.status;
+            let gisDetailsText = "Coordinates matched. Parcel geometry shape validated. GIS calculated area matches registered records.";
+            if (gisStatus !== 'clear') {
+                const gisArea = currentProperty.geometry ? calculateParcelArea(currentProperty.geometry) : currentProperty.area;
+                gisDetailsText = `Geospatial warning: The GIS calculated area of ${gisArea.toFixed(2)} Acres deviates from the registered record of ${currentProperty.area.toFixed(2)} Acres, or coordinate attributes are inconsistent.`;
+            }
+
+            const badgeClass = currentScore >= 80 ? 'badge-success' : currentScore >= 60 ? 'badge-warning' : 'badge-danger';
+            const riskLabel = currentScore >= 80 ? 'LOW' : currentScore >= 60 ? 'MEDIUM' : 'HIGH';
+            
+            const hasMortgage = currentProperty.mortgage !== "None" && currentProperty.mortgage !== "";
+            const hasCourtCase = typeof currentProperty.courtCase === 'object';
+            const courtCaseText = hasCourtCase ? `Active Litigation: Case ID ${currentProperty.courtCase.caseId} at ${currentProperty.courtCase.court} (${currentProperty.courtCase.issue})` : 'No Litigation Found';
+            const timestamp = new Date().toLocaleString();
+
+            const recommendation = currentScore >= 80 ? 'The property title is verified and appears clear of major ownership mismatches, liabilities, or legal disputes. Highly recommended for transaction.' :
+                                   currentScore >= 60 ? 'CAUTION: Medium risk detected. This property has minor discrepancies (e.g. slight area mismatch, active mortgages). Legal clearance is advised before proceeding.' :
+                                   'HIGH RISK: Serious mismatch and/or legal disputes detected. The transaction carries high risk. Transaction is NOT recommended without prior resolution of owner names and liabilities.';
+
+            const getBadgeHTML = (status) => {
+                if (status === 'match') return '<span class="badge badge-success">Match</span>';
+                if (status === 'partial') return '<span class="badge badge-warning">Partial Match</span>';
+                return '<span class="badge badge-danger">Mismatch</span>';
+            };
+
+            // Compile issues dynamically
+            let detectedIssuesList = [];
+            if (comparisonResult.breakdown.owner.status !== 'match') {
+                detectedIssuesList.push(`Ownership name mismatch: Government record is "${currentProperty.ownerName}", Sale Deed states "${extractedData.ownerName}"`);
+            }
+            if (comparisonResult.breakdown.khasra.status !== 'match') {
+                detectedIssuesList.push(`Khasra number mismatch: Government record is "${currentProperty.khasra}", Sale Deed states "${extractedData.khasra}"`);
+            }
+            if (comparisonResult.breakdown.area.status !== 'match') {
+                detectedIssuesList.push(`Area mismatch: Government record is "${currentProperty.area} Acres", Sale Deed states "${extractedData.area} Acres"`);
+            }
+            if (comparisonResult.breakdown.registration.status !== 'match') {
+                detectedIssuesList.push(`Registration number mismatch: Government record is "${currentProperty.registrationNumber}", Sale Deed states "${extractedData.registrationNumber}"`);
+            }
+            if (hasMortgage) {
+                detectedIssuesList.push(`Active mortgage lien: Collateralized with "${currentProperty.mortgage}" (₹${currentProperty.mortgageAmount})`);
+            }
+            if (hasCourtCase) {
+                detectedIssuesList.push(`Pending court dispute: Case ID "${currentProperty.courtCase.caseId}" in "${currentProperty.courtCase.court}"`);
+            }
+
+            let issuesHTML = "";
+            if (detectedIssuesList.length > 0) {
+                issuesHTML = `
+                    <div class="section-title">5. Flagged Verification Issues</div>
+                    <ul style="font-size: 12px; color: #b91c1c; padding-left: 20px; line-height: 1.6; margin-bottom: 25px; margin-top: 0;">
+                        ${detectedIssuesList.map(issue => `<li><strong>${issue}</strong></li>`).join('')}
+                    </ul>
+                `;
+            } else {
+                issuesHTML = `
+                    <div class="section-title">5. Flagged Verification Issues</div>
+                    <p style="font-size: 12px; color: #047857; font-weight: bold; margin-bottom: 25px; margin-top: 0;">✓ No verification issues or active liabilities detected.</p>
+                `;
+            }
+
+            const html = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>SETU Land Verification Certificate – ${currentProperty.id}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #1e293b; background-color: #f8fafc; }
+                        .certificate-border { border: 8px double #06b6d4; padding: 30px; border-radius: 12px; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.05); max-width: 800px; margin: auto; position: relative; }
+                        .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+                        .logo { font-size: 28px; font-weight: 800; color: #0f172a; letter-spacing: 2px; }
+                        .logo span { color: #06b6d4; }
+                        .subtitle { font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #64748b; font-weight: bold; margin-top: 5px; }
+                        .section-title { font-size: 14px; border-bottom: 1.5px solid #06b6d4; padding-bottom: 4px; margin-bottom: 15px; text-transform: uppercase; font-weight: bold; color: #0f172a; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13px; }
+                        th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
+                        th { background-color: #f1f5f9; color: #475569; font-weight: 600; }
+                        .score-card { float: right; border: 1.5px solid #e2e8f0; padding: 12px 20px; border-radius: 8px; text-align: center; background-color: #f8fafc; }
+                        .score { font-size: 32px; font-weight: 900; color: ${currentScore >= 80 ? '#10b981' : currentScore >= 60 ? '#d97706' : '#ef4444'}; }
+                        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+                        .badge-success { background-color: #d1fae5; color: #065f46; }
+                        .badge-warning { background-color: #fef3c7; color: #92400e; }
+                        .badge-danger { background-color: #fee2e2; color: #991b1b; }
+                        .disclaimer { font-size: 9px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 40px; text-align: center; line-height: 1.4; }
+                        .recommendation-box { background: #f8fafc; border-left: 4px solid #06b6d4; padding: 12px; font-size: 13px; margin-bottom: 25px; border-radius: 0 8px 8px 0; }
+                        @media print {
+                            body { padding: 0; background: none; }
+                            .certificate-border { border: 8px double #000; box-shadow: none; max-width: 100%; }
+                            .section-title { border-bottom: 1.5px solid #000; }
+                            .print-btn { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="certificate-border">
+                        <div class="score-card">
+                            <div style="font-size:10px; font-weight:bold; color:#64748b; text-transform:uppercase; letter-spacing:1px;">Security Score</div>
+                            <div class="score">${currentScore} / 100</div>
+                            <div class="badge ${badgeClass}">${riskLabel} RISK</div>
+                        </div>
+                        
+                        <div class="header">
+                            <div class="logo">SE<span>TU</span></div>
+                            <div class="subtitle">AI Land Audit & Verification Clearance</div>
+                        </div>
+                        
+                        <div class="section-title">1. Property Registry Identity</div>
+                        <table>
+                            <tr>
+                                <th>Property ID</th><td>${currentProperty.id}</td>
+                                <th>State</th><td>${currentProperty.state}</td>
+                            </tr>
+                            <tr>
+                                <th>District</th><td>${currentProperty.district}</td>
+                                <th>Tehsil</th><td>${currentProperty.tehsil}</td>
+                            </tr>
+                            <tr>
+                                <th>Village</th><td>${currentProperty.village}</td>
+                                <th>Khasra Number</th><td>${currentProperty.khasra}</td>
+                            </tr>
+                            <tr>
+                                <th>Area (Authoritative)</th><td>${currentProperty.area} Acres</td>
+                                <th>Property Type</th><td>${currentProperty.propertyType}</td>
+                            </tr>
+                            <tr>
+                                <th>Property Address</th><td colspan="3">${currentProperty.address}</td>
+                            </tr>
+                        </table>
+
+                        <div class="section-title">2. Title Comparison Audit (Govt vs Deed)</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Audited Field</th>
+                                    <th>Government Authority</th>
+                                    <th>Deed Document (OCR Extract)</th>
+                                    <th>Match Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Owner Name</td>
+                                    <td>${currentProperty.ownerName}</td>
+                                    <td>${extractedData.ownerName}</td>
+                                    <td>${getBadgeHTML(comparisonResult.breakdown.owner.status)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Father's Name</td>
+                                    <td>${currentProperty.fatherName}</td>
+                                    <td>${extractedData.fatherName}</td>
+                                    <td>${getBadgeHTML(currentProperty.fatherName === extractedData.fatherName ? 'match' : 'mismatch')}</td>
+                                </tr>
+                                <tr>
+                                    <td>Khasra Number</td>
+                                    <td>${currentProperty.khasra}</td>
+                                    <td>${extractedData.khasra}</td>
+                                    <td>${getBadgeHTML(comparisonResult.breakdown.khasra.status)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Area</td>
+                                    <td>${currentProperty.area} Acres</td>
+                                    <td>${extractedData.area} Acres</td>
+                                    <td>${getBadgeHTML(comparisonResult.breakdown.area.status)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Registration Number</td>
+                                    <td>${currentProperty.registrationNumber}</td>
+                                    <td>${extractedData.registrationNumber}</td>
+                                    <td>${getBadgeHTML(comparisonResult.breakdown.registration.status)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="section-title">3. Liabilities, Legal & GIS Audits</div>
+                        <table>
+                            <tr>
+                                <th>Audit Type</th>
+                                <th>Registry Search Details</th>
+                                <th>Status Badge</th>
+                            </tr>
+                            <tr>
+                                <td>Encumbrance Check</td>
+                                <td>${hasMortgage ? `COLLATERAL LIEN ACTIVE: mortgaged to ${currentProperty.mortgage} (Principal ₹${currentProperty.mortgageAmount}, registered ${currentProperty.mortgageDate})` : 'No mortgage liens found.'}</td>
+                                <td>${getBadgeHTML(comparisonResult.breakdown.encumbrance.status === 'clear' ? 'match' : 'mismatch')}</td>
+                            </tr>
+                            <tr>
+                                <td>Litigation Registry Check</td>
+                                <td>${courtCaseText}</td>
+                                <td>${getBadgeHTML(comparisonResult.breakdown.court.status === 'clear' ? 'match' : 'mismatch')}</td>
+                            </tr>
+                            <tr>
+                                <td>Geospatial & Cadastral Verification</td>
+                                <td>${gisDetailsText}</td>
+                                <td>${getBadgeHTML(gisStatus === 'clear' ? 'match' : 'mismatch')}</td>
+                            </tr>
+                        </table>
+                        
+                        <div class="section-title">4. Clearance Recommendation</div>
+                        <div class="recommendation-box">
+                            <strong>Final Recommendation:</strong> ${recommendation}
+                        </div>
+
+                        ${issuesHTML}
+
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                            <div>
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=SETU-VERIFIED-ID-${currentProperty.id}-SCORE-${currentScore}-TIME-${encodeURIComponent(timestamp)}" alt="Audit QR Code" style="border: 1px solid #cbd5e1; padding: 4px; border-radius: 4px;">
+                                <div style="font-size: 8px; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Verification Hash QR</div>
+                            </div>
+                            <div style="font-size: 11px; text-align: right; color: #64748b;">
+                                <div><strong>Audit Timestamp:</strong> ${timestamp}</div>
+                                <div><strong>Verification Authority:</strong> SETU Security Protocol</div>
+                                <div style="margin-top: 10px; font-weight: bold; color: #0f172a;">DIGITALLY SECURED SYSTEM</div>
+                            </div>
+                        </div>
+
+                        <div class="disclaimer">
+                            SETU is a Smart India Hackathon prototype. Verification logs and reports shown are generated via client-side/microservice simulations and do not constitute certified legal registry documents. Use only for audit demonstration purposes.
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 30px;">
+                            <button onclick="window.print()" class="print-btn" style="padding: 10px 24px; font-size: 14px; background-color: #06b6d4; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 10px rgba(6,182,212,0.3);">Print Certificate</button>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            reportWindow.document.write(html);
+            reportWindow.document.close();
+        }
+
+        // 12. Verification History Management (localStorage + Backend API Integration)
+        function renderHistoryTable() {
+            const rows = document.getElementById('history-rows');
+            rows.innerHTML = '';
+            
+            // Get history from localStorage fallback
+            let history = JSON.parse(localStorage.getItem('setu_history') || '[]');
+            
+            if (history.length === 0) {
+                // Seed default mock history
+                history = [
+                    {
+                        "propertyId": "PROP-001",
+                        "ownerName": "Rajesh Kumar",
+                        "date": "24 Aug 2026",
+                        "score": 65,
+                        "risk": "Medium",
+                        "status": "Issues Found"
+                    },
+                    {
+                        "propertyId": "PROP-002",
+                        "ownerName": "Amit Sharma",
+                        "date": "23 Aug 2026",
+                        "score": 92,
+                        "risk": "Low",
+                        "status": "Verified"
+                    }
+                ];
+                localStorage.setItem('setu_history', JSON.stringify(history));
+            }
+
+            history.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-white/[0.02] transition cursor-pointer";
+                tr.onclick = () => loadHistoryItem(item.propertyId);
+                
+                let riskClass = "";
+                let riskLabel = "";
+                if (item.risk.toUpperCase() === 'LOW') {
+                    riskClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                    riskLabel = i18n[currentLang].lowRisk;
+                } else if (item.risk.toUpperCase() === 'MEDIUM') {
+                    riskClass = "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20";
+                    riskLabel = i18n[currentLang].mediumRisk;
+                } else {
+                    riskClass = "bg-red-500/10 text-red-400 border border-red-500/20";
+                    riskLabel = i18n[currentLang].highRisk;
+                }
+
+                let statusClass = item.status === 'Verified' ? 'text-emerald-400' : 'text-yellow-400';
+                let statusLabel = item.status === 'Verified' ? i18n[currentLang].verified : i18n[currentLang].issuesFound;
+
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-white">${item.propertyId}</td>
+                    <td class="p-3 text-gray-300">${item.ownerName}</td>
+                    <td class="p-3 text-gray-400">${item.date}</td>
+                    <td class="p-3 font-bold text-white">${item.score}%</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] ${riskClass}">${riskLabel}</span></td>
+                    <td class="p-3 ${statusClass} font-semibold">${statusLabel}</td>
+                    <td class="p-3 text-right">
+                        <button class="text-xs text-cyan-400 hover:text-cyan-300 font-bold" data-i18n="viewReport">${i18n[currentLang].viewReport}</button>
+                    </td>
+                `;
+                rows.appendChild(tr);
+            });
+        }
+
+        async function saveToHistory(propertyId, ownerName, score, risk) {
+            const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            const newEntry = {
+                propertyId: propertyId,
+                ownerName: ownerName,
+                date: dateStr,
+                score: score,
+                risk: risk,
+                status: score >= 80 ? "Verified" : "Issues Found"
+            };
+
+            // Post to backend if running
+            if (isBackendAvailable) {
+                try {
+                    await fetch(`${API_URL}/verification-history`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(newEntry)
+                    });
+                } catch (err) {
+                    console.error("Backend history save failed:", err);
+                }
+            }
+
+            // Save locally
+            let history = JSON.parse(localStorage.getItem('setu_history') || '[]');
+            // Deduplicate same property verifications
+            history = history.filter(item => item.propertyId !== propertyId);
+            history.unshift(newEntry); // Put on top
+            localStorage.setItem('setu_history', JSON.stringify(history));
+        }
+
+        function loadHistoryItem(propertyId) {
+            currentProperty = clientPropertiesDb[propertyId];
+            extractedData = getClientOcrData(propertyId);
+            comparisonResult = runClientVerification(currentProperty, extractedData);
+            currentScore = comparisonResult.score;
+            currentRisk = comparisonResult.risk;
+
+            renderResultsDashboard();
+            navigateTo('results');
         }
     </script>
 </body>
